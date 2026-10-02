@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { threadScope, type PromptInput } from "@bb/domain";
+import { threadScope, type RuntimePromptInput } from "@bb/domain";
 import { noopNotifier } from "../../src/notifier.js";
 import { insertEvents } from "../../src/data/events.js";
 import {
@@ -24,7 +24,7 @@ import { createThread } from "../../src/data/threads.js";
 import { upsertHost } from "../../src/data/hosts.js";
 import { createMigratedConnection } from "../helpers/migrated-connection.js";
 
-function textInput(text: string): PromptInput[] {
+function textInput(text: string): RuntimePromptInput[] {
   return [{ type: "text", text, mentions: [] }];
 }
 

@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { promptInputSchema, type PromptInput } from "./shared-types.js";
+import {
+  runtimePromptInputSchema,
+  promptInputSchema,
+  type RuntimePromptInput,
+} from "./shared-types.js";
 
 export const PROMPT_HISTORY_ENTRY_LIMIT = 50;
 export const PROMPT_HISTORY_PAGE_DEFAULT_LIMIT = 100;
@@ -12,7 +16,7 @@ export type PromptHistoryScope = z.infer<typeof promptHistoryScopeSchema>;
 export const promptHistoryEntrySchema = z.object({
   id: z.string().min(1),
   createdAt: z.number(),
-  input: z.array(promptInputSchema).min(1),
+  input: z.array(runtimePromptInputSchema).min(1),
 });
 export type PromptHistoryEntry = z.infer<typeof promptHistoryEntrySchema>;
 
@@ -25,7 +29,7 @@ export type PromptHistoryListEntry = z.infer<
 >;
 
 interface PromptHistoryComparableEntry {
-  input: readonly PromptInput[];
+  input: readonly RuntimePromptInput[];
 }
 
 interface TakeVisiblePromptHistoryEntriesArgs<
@@ -36,8 +40,8 @@ interface TakeVisiblePromptHistoryEntriesArgs<
 }
 
 export function arePromptHistoryInputsEqual(
-  left: readonly PromptInput[],
-  right: readonly PromptInput[],
+  left: readonly RuntimePromptInput[],
+  right: readonly RuntimePromptInput[],
 ): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
@@ -67,3 +71,27 @@ export function takeVisiblePromptHistoryEntries<
 
   return visibleEntries;
 }
+
+export const referencePromptHistoryInputSchema = z.union([
+  promptInputSchema,
+  z.object({
+    type: z.literal("unavailableAttachment"),
+    path: z.string(),
+    reason: z.string(),
+  }),
+]);
+export const referencePromptHistoryEntrySchema =
+  promptHistoryEntrySchema.extend({
+    input: z.array(referencePromptHistoryInputSchema),
+  });
+export type ReferencePromptHistoryEntry = z.infer<
+  typeof referencePromptHistoryEntrySchema
+>;
+export const referencePromptHistoryListEntrySchema =
+  referencePromptHistoryEntrySchema.extend({
+    projectId: z.string(),
+    threadId: z.string(),
+  });
+export type ReferencePromptHistoryListEntry = z.infer<
+  typeof referencePromptHistoryListEntrySchema
+>;

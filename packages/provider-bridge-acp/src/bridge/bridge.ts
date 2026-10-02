@@ -3,7 +3,11 @@ import {
   pendingInteractionResolutionSchema,
   reasoningEffortsForLevels,
 } from "@bb/domain";
-import type { AvailableModel, PromptInput, ReasoningLevel } from "@bb/domain";
+import type {
+  AvailableModel,
+  RuntimePromptInput,
+  ReasoningLevel,
+} from "@bb/domain";
 import { acpLaunchSpecSchema, type AcpLaunchSpec } from "../launch-spec.js";
 import {
   BRIDGE_INBOUND_REQUEST_METHODS,
@@ -156,7 +160,7 @@ interface PendingAcpPermission {
 
 interface AcpPendingTurnInput {
   clientRequestId: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   requestId: AcpBridgeRequestId | null;
 }
 
@@ -1284,7 +1288,7 @@ async function selectAcpNativeServiceTier(args: {
 
 function buildPromptContentBlocks(
   session: AcpThreadSession,
-  input: PromptInput[],
+  input: RuntimePromptInput[],
 ): AcpContentBlock[] {
   const blocks: AcpContentBlock[] = [];
 

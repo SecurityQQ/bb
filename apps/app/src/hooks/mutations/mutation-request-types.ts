@@ -1,17 +1,17 @@
 import type {
   EnvironmentActionRequest,
-  EditMessageRequest,
-  SendMessageRequest,
+  RuntimeEditMessageRequest,
+  RuntimeSendMessageRequest,
 } from "@bb/server-contract";
 
 export type RequestEnvironmentActionMutationRequest = {
   id: string;
 } & EnvironmentActionRequest;
 
-export interface SendThreadMessageMutationRequest extends SendMessageRequest {
+export interface SendThreadMessageMutationRequest extends RuntimeSendMessageRequest {
   id: string;
 }
 
-export interface EditMessageMutationRequest extends EditMessageRequest {
+export interface EditMessageMutationRequest extends RuntimeEditMessageRequest {
   id: string;
 }

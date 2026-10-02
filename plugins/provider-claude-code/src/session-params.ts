@@ -3,7 +3,7 @@ import {
   removeCommandMentionsFromPromptInput,
   type DynamicTool,
   type InstructionMode,
-  type PromptInput,
+  type RuntimePromptInput,
   type ReasoningLevel,
   type ServiceTier,
   type RuntimePermissionPolicy,
@@ -204,9 +204,9 @@ export function buildClaudeSessionParams(
 }
 
 function stripClaudePlanCommandMentions(args: {
-  input: readonly PromptInput[];
+  input: readonly RuntimePromptInput[];
   claudeCodePermissionMode: "plan" | undefined;
-}): PromptInput[] {
+}): RuntimePromptInput[] {
   if (args.claudeCodePermissionMode !== "plan") {
     return [...args.input];
   }
@@ -220,7 +220,7 @@ interface BuildClaudeTurnParamsArgs {
   threadId: string;
   providerThreadId: string | null;
   expectedTurnId?: string | undefined;
-  input: readonly PromptInput[];
+  input: readonly RuntimePromptInput[];
   options: ClaudeCanonicalExecutionOptions;
 }
 

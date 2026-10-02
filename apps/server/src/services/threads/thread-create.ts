@@ -29,7 +29,10 @@ import {
   rememberProjectExecutionDefaultsForCreate,
   resolveProjectExecutionDefaultsForCreate,
 } from "./project-execution-defaults.js";
-import { resolvePromptAttachmentReferences } from "../projects/attachments.js";
+import {
+  resolvePromptHost,
+  resolvePromptAttachmentReferences,
+} from "../projects/attachments.js";
 import {
   appendPluginMentionContext,
   captureUserMessageSentTelemetry,
@@ -700,6 +703,7 @@ export async function createThreadFromRequest(
           ? request.environment.machine.hostId
           : null
         : null;
+  request.input = resolvePromptHost(request.input, childHostId);
   assertForkSourceHost(deps, {
     childHostId,
     originKind: request.originKind ?? null,

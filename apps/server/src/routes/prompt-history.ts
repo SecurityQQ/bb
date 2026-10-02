@@ -1,3 +1,4 @@
+import { referenceHistoryInput } from "../services/projects/attachments.js";
 import type { Hono } from "hono";
 import type { PromptHistoryPosition } from "@bb/db";
 import {
@@ -23,7 +24,7 @@ export function registerPromptHistoryRoutes(app: Hono, deps: AppDeps): void {
       new ApiError(400, "invalid_request", message),
   });
 
-  get(publicApiRoutes.promptHistory.list, (context, query) => {
+  get(publicApiRoutes.promptHistory.list, async (context, query) => {
     const limit = parseBoundedPositiveOptionalInteger({
       defaultValue: PROMPT_HISTORY_PAGE_DEFAULT_LIMIT,
       max: PROMPT_HISTORY_PAGE_MAX_LIMIT,
@@ -41,6 +42,26 @@ export function registerPromptHistoryRoutes(app: Hono, deps: AppDeps): void {
         );
       }
     }
-    return context.json(listPromptHistory(deps, { before, limit }));
+    const result = listPromptHistory(deps, { before, limit });
+    if (context.req.header("x-bb-prompt-references") === "1") {
+      const entries = await Promise.all(
+        result.entries.map(async (entry) => ({
+          ...entry,
+          input: await referenceHistoryInput(
+            deps.db,
+            deps.config.dataDir,
+            entry.projectId,
+            entry.input,
+          ),
+        })),
+      );
+      return new Response(JSON.stringify({ ...result, entries }), {
+        headers: {
+          "content-type": "application/json",
+          vary: "x-bb-prompt-references",
+        },
+      });
+    }
+    return context.json(result);
   });
 }

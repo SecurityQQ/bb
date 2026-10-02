@@ -8,7 +8,7 @@ import type {
   ApprovalPendingInteractionResolution,
   ClientTurnRequestId,
   CompletedTurnDisplay,
-  PromptInput,
+  RuntimePromptInput,
   ProviderRawEvent,
   ProvisioningTranscriptEntry,
   ResolvedThreadExecutionOptions,
@@ -86,8 +86,8 @@ interface DefaultTurnEventOptions extends EventFactoryRowOptions {
 type ClientTurnRequestedArgs = EventFactoryRowOptions & {
   execution?: ResolvedThreadExecutionOptions;
   initiator?: ThreadTurnInitiator;
-  input?: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input?: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   requestId?: ClientTurnRequestId;
   requestMethod?: "thread/start" | "turn/start";
   senderThreadId?: string | null;

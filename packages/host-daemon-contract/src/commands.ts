@@ -15,7 +15,7 @@ import {
   instructionModeSchema,
   pendingInteractionResolutionSchema,
   permissionModeSchema,
-  promptInputSchema,
+  runtimePromptInputSchema,
   providerForkSchema,
   threadGitDiffResponseSchema,
   runtimeThreadExecutionOptionsSchema,
@@ -250,7 +250,7 @@ const hostDaemonThreadWorkspaceTargetSchema =
     workspaceContext: workspaceContextSchema,
   });
 
-type HostDaemonPromptInput = z.infer<typeof promptInputSchema>;
+type HostDaemonPromptInput = z.infer<typeof runtimePromptInputSchema>;
 
 interface GroupedPromptInputCommand {
   input: HostDaemonPromptInput[];
@@ -281,8 +281,11 @@ const threadStartCommandSchema = hostDaemonThreadTargetSchema
   .extend({
     type: z.literal("thread.start"),
     requestId: clientTurnRequestIdSchema,
-    input: z.array(promptInputSchema),
-    inputGroups: z.array(z.array(promptInputSchema).min(1)).min(1).optional(),
+    input: z.array(runtimePromptInputSchema),
+    inputGroups: z
+      .array(z.array(runtimePromptInputSchema).min(1))
+      .min(1)
+      .optional(),
     threadStoragePath: z.string().min(1).optional(),
     fork: z
       .object({
@@ -339,8 +342,11 @@ const turnSubmitCommandSchema = hostDaemonThreadTargetSchema
   .extend({
     type: z.literal("turn.submit"),
     requestId: clientTurnRequestIdSchema,
-    input: z.array(promptInputSchema).min(1),
-    inputGroups: z.array(z.array(promptInputSchema).min(1)).min(1).optional(),
+    input: z.array(runtimePromptInputSchema).min(1),
+    inputGroups: z
+      .array(z.array(runtimePromptInputSchema).min(1))
+      .min(1)
+      .optional(),
     options: runtimeThreadExecutionOptionsSchema,
     bridgeLaunch: hostDaemonBridgeLaunchSchema,
     resumeContext: turnResumeContextSchema,

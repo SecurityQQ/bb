@@ -1,5 +1,5 @@
 import {
-  type PromptInput,
+  type RuntimePromptInput,
   type PromptTextMention,
   type ThreadEvent,
 } from "@bb/domain";
@@ -18,7 +18,7 @@ import { eventProjectionMessageTurnScopeFields } from "./message-scope.js";
 import { parseAgentMessageEnvelope } from "./agent-message-envelope.js";
 
 export function parsePromptInput(
-  input: ReadonlyArray<PromptInput> | undefined,
+  input: ReadonlyArray<RuntimePromptInput> | undefined,
 ): {
   text: string;
   webImages: number;
@@ -28,6 +28,7 @@ export function parsePromptInput(
   localImagePaths: string[];
   localFilePaths: string[];
   mentions: PromptTextMention[];
+  localReferences?: RuntimePromptInput[];
 } | null {
   if (!Array.isArray(input) || input.length === 0) return null;
 
@@ -39,6 +40,7 @@ export function parsePromptInput(
   const localImagePaths: string[] = [];
   const localFilePaths: string[] = [];
   const mentions: PromptTextMention[] = [];
+  const localReferences: RuntimePromptInput[] = [];
   let textOffset = 0;
 
   for (const part of input) {
@@ -46,6 +48,11 @@ export function parsePromptInput(
       continue;
     }
 
+    if (
+      (part.type === "localFile" || part.type === "localImage") &&
+      (part.attachmentId || part.hostId)
+    )
+      localReferences.push(part);
     switch (part.type) {
       case "text":
         if (part.text.length > 0) {
@@ -100,6 +107,7 @@ export function parsePromptInput(
     imageUrls,
     localImagePaths,
     localFilePaths,
+    ...(localReferences.length ? { localReferences } : {}),
     mentions,
   };
 }
@@ -150,6 +158,9 @@ function buildAttachments(
     webImages: parsed.webImages,
     localImages: parsed.localImages,
     localFiles: parsed.localFiles,
+    ...(parsed.localReferences
+      ? { localReferences: parsed.localReferences }
+      : {}),
     ...(parsed.imageUrls.length > 0 ? { imageUrls: parsed.imageUrls } : {}),
     ...(parsed.localImagePaths.length > 0
       ? { localImagePaths: parsed.localImagePaths }
@@ -262,7 +273,7 @@ interface BuildClientUserMessageArgs {
   acceptedClientRequest?: AcceptedClientRequest;
   decoded: ClientTurnRequestedEvent;
   idSuffix?: string;
-  input: ReadonlyArray<PromptInput>;
+  input: ReadonlyArray<RuntimePromptInput>;
   meta: EventMeta;
   requestStatus: EventProjectionTurnRequest["status"];
 }

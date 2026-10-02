@@ -8,6 +8,7 @@ import {
   useComposer,
   experimental_usePluginId,
   type ComposerDraftSnapshot,
+  type ComposerDraftReplacement,
   useRpc,
   type ExperimentalPluginBrowserPage,
   type ExperimentalPluginBrowserToolbarActionProps,
@@ -69,7 +70,7 @@ function withoutAnnotation(
   draft: ComposerDraftSnapshot,
   pluginId: string,
   id: string,
-): ComposerDraftSnapshot {
+): ComposerDraftReplacement {
   const removed = draft.mentions
     .filter(
       (mention) =>
@@ -79,7 +80,7 @@ function withoutAnnotation(
         mention.id === id,
     )
     .sort((a, b) => b.from - a.from);
-  let next = draft;
+  let next = { text: draft.text, mentions: draft.mentions };
   for (const match of removed) {
     const length = match.to - match.from;
     next = {

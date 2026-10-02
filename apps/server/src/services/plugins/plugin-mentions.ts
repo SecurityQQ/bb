@@ -1,14 +1,14 @@
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import { ApiError } from "../../errors.js";
 import { resolvePluginMention } from "./plugin-agent-contributions.js";
 
 type PluginMentionResource = Extract<
-  Extract<PromptInput, { type: "text" }>["mentions"][number]["resource"],
+  Extract<RuntimePromptInput, { type: "text" }>["mentions"][number]["resource"],
   { kind: "plugin" }
 >;
 
 function collectPluginMentionResources(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): PluginMentionResource[] {
   const seen = new Set<string>();
   const resources: PluginMentionResource[] = [];
@@ -27,11 +27,11 @@ function collectPluginMentionResources(
 }
 
 export async function resolvePluginMentionContextInputs(
-  input: readonly PromptInput[],
-): Promise<PromptInput[]> {
+  input: readonly RuntimePromptInput[],
+): Promise<RuntimePromptInput[]> {
   const resources = collectPluginMentionResources(input);
   if (resources.length === 0) return [];
-  const contextInputs: PromptInput[] = [];
+  const contextInputs: RuntimePromptInput[] = [];
   for (const resource of resources) {
     const result = await resolvePluginMention({
       pluginId: resource.pluginId,

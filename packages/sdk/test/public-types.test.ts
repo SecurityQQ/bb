@@ -1,3 +1,4 @@
+import type { PromptInput, RuntimePromptInput } from "@bb/domain";
 import { describe, expectTypeOf, it } from "vitest";
 import type {
   BbRealtime as RootBbRealtime,
@@ -348,7 +349,13 @@ type ExpectedProjectsKey =
   | "update";
 
 type ExpectedProjectSourcesKey = "add" | "delete" | "update";
-type ExpectedProjectAttachmentsKey = "copy" | "read" | "upload";
+type ExpectedProjectAttachmentsKey =
+  | "experimental_get"
+  | "experimental_lookup"
+  | "experimental_contentUrl"
+  | "copy"
+  | "read"
+  | "upload";
 
 type ExpectedProvidersKey = "catalog" | "list" | "models" | "setEnabled";
 
@@ -613,4 +620,28 @@ describe("SDK public type entrypoints", () => {
       keyof RootBbSdk["threads"]["tabs"]
     >().toEqualTypeOf<ExpectedThreadTabsKey>();
   });
+});
+
+it("requires attachment identity or explicit host identity in public send inputs", () => {
+  expectTypeOf<{
+    type: "attachment";
+    attachmentId: string;
+  }>().toMatchTypeOf<PromptInput>();
+  expectTypeOf<{
+    type: "localFile";
+    hostId: string;
+    path: string;
+  }>().toMatchTypeOf<PromptInput>();
+  expectTypeOf<{
+    type: "localFile";
+    path: string;
+  }>().not.toMatchTypeOf<PromptInput>();
+  expectTypeOf<{
+    type: "localImage";
+    path: string;
+    experimental_sourceProjectId: string;
+  }>().not.toMatchTypeOf<PromptInput>();
+  expectTypeOf<RuntimePromptInput[]>().not.toMatchTypeOf<
+    Parameters<RootBbSdk["threads"]["send"]>[0]["input"]
+  >();
 });

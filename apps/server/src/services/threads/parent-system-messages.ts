@@ -6,7 +6,7 @@ import {
   type DbTransaction,
 } from "@bb/db";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   PromptMentionResource,
   PromptTextMention,
   ResolvedThreadExecutionOptions,
@@ -63,7 +63,7 @@ export interface ParentSystemMessageTaxonomy {
 }
 
 interface QueueParentSystemMessageArgs extends ParentSystemMessageTaxonomy {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   parentThreadId: string;
 }
 
@@ -114,7 +114,7 @@ interface RenderedParentSystemSlotParts {
 interface QueueReadyParentSystemMessageArgs extends ParentSystemMessageTaxonomy {
   environment: ReadyThreadEnvironment;
   execution: ResolvedThreadExecutionOptions;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   thread: Thread;
 }
 
@@ -160,7 +160,7 @@ function splitRenderedParentSystemSlot(
 
 function buildParentSystemInputFromSegments(
   args: BuildParentSystemInputFromSegmentsArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   let text = "";
   const mentions: PromptTextMention[] = [];
 
@@ -187,7 +187,7 @@ function buildParentSystemInputFromSegments(
 
 export function buildParentSystemInputFromTemplateSlot(
   args: BuildParentSystemInputFromTemplateSlotArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   const parts = splitRenderedParentSystemSlot(args);
   return buildParentSystemInputFromSegments({
     segments: [
@@ -504,7 +504,7 @@ export async function queueParentSystemMessage(
 }
 
 interface DeliverParentSystemMessageArgs extends ParentSystemMessageTaxonomy {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   parentThread: Thread;
 }
 

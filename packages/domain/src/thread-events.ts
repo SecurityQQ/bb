@@ -8,7 +8,7 @@ import {
   userQuestionPendingInteractionResolutionSchema,
 } from "./pending-interactions.js";
 import {
-  promptInputSchema,
+  runtimePromptInputSchema,
   recordedThreadExecutionOptionsSchema,
 } from "./shared-types.js";
 import { jsonValueSchema } from "./json-value.js";
@@ -92,8 +92,11 @@ export const turnRequestEventDataSchema = z.object({
   senderThreadId: z.string().nullable(),
   systemMessageKind: systemMessageKindSchema.optional(),
   systemMessageSubject: systemMessageSubjectSchema.nullable().optional(),
-  input: z.array(promptInputSchema),
-  inputGroups: z.array(z.array(promptInputSchema).min(1)).min(1).optional(),
+  input: z.array(runtimePromptInputSchema),
+  inputGroups: z
+    .array(z.array(runtimePromptInputSchema).min(1))
+    .min(1)
+    .optional(),
   target: turnRequestTargetSchema,
   request: z.object({
     method: z.enum(["thread/start", "turn/start"]),

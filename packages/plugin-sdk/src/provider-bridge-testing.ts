@@ -128,7 +128,7 @@ export type {
 // built — `ThreadEvent` is what every collector, replay and parity function
 // here returns, and the item and presentation types are what an assertion
 // narrows to. Re-exported from bb's domain package and inlined into the
-// published declarations, like `PromptInput` on the root entry.
+// published declarations, like `RuntimePromptInput` on the root entry.
 export type {
   ThreadEvent,
   ThreadEventBackgroundTaskItem,

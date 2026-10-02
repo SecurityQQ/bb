@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
-import { PERSONAL_PROJECT_ID, type PromptInput } from "@bb/domain";
+import { PERSONAL_PROJECT_ID, type RuntimePromptInput } from "@bb/domain";
 import {
   createConnection,
   createQueuedThreadMessage,
@@ -17,7 +17,7 @@ const originalMigration = readFileSync(
   "utf8",
 );
 
-function text(value: string): PromptInput {
+function text(value: string): RuntimePromptInput {
   return { type: "text", text: value, mentions: [] };
 }
 
@@ -39,7 +39,7 @@ it.each([false, true])(
       });
       const queue = (
         threadId: string,
-        content: PromptInput[],
+        content: RuntimePromptInput[],
         pluginId: string | null,
       ) =>
         createQueuedThreadMessage(db, noopNotifier, {

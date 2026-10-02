@@ -1,4 +1,7 @@
-import type { PromptInput, ProvisioningTranscriptEntry } from "@bb/domain";
+import type {
+  RuntimePromptInput,
+  ProvisioningTranscriptEntry,
+} from "@bb/domain";
 import type { LoggedWorkSessionDeps } from "../../types.js";
 import { appendThreadProvisioningEvent } from "./thread-events.js";
 import {
@@ -9,7 +12,7 @@ import {
 import { runtimeErrorLogFields } from "../lib/error-log-fields.js";
 
 interface ThreadMetadataInferenceArgs {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   provisioningId: string;
   threadId: string;
   writeTranscript: boolean;

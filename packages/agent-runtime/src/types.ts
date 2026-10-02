@@ -7,7 +7,7 @@ import type {
   JsonObject,
   PendingInteractionCreate,
   PendingInteractionResolution,
-  PromptInput,
+  RuntimePromptInput,
   ProviderFork,
   ProviderRecoveryKind,
   RuntimeThreadExecutionOptions,
@@ -129,7 +129,7 @@ export interface StartThreadArgs {
   providerId: string;
   contributedEnv?: readonly AgentRuntimeContributedEnvEntry[];
   clientRequestId?: ClientTurnRequestId;
-  input?: PromptInput[];
+  input?: RuntimePromptInput[];
   options: AgentRuntimeExecutionOptions;
   instructions?: string;
   dynamicTools?: DynamicTool[];
@@ -190,7 +190,7 @@ export interface ResumeThreadResult {
 
 export interface RunTurnArgs {
   threadId: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   clientRequestId: ClientTurnRequestId;
   options: AgentRuntimeExecutionOptions;
   contributedEnv?: readonly AgentRuntimeContributedEnvEntry[];
@@ -200,7 +200,7 @@ export interface RunTurnArgs {
 export interface SteerTurnArgs {
   threadId: string;
   expectedTurnId: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   clientRequestId: ClientTurnRequestId;
   options: AgentRuntimeExecutionOptions;
   contributedEnv?: readonly AgentRuntimeContributedEnvEntry[];

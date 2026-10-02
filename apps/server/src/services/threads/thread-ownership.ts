@@ -6,7 +6,11 @@ import {
   type DbTransaction,
   updateThread,
 } from "@bb/db";
-import type { PromptInput, SystemMessageSubject, Thread } from "@bb/domain";
+import type {
+  RuntimePromptInput,
+  SystemMessageSubject,
+  Thread,
+} from "@bb/domain";
 import { renderTemplate } from "@bb/templates";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
 import { NotificationBuffer } from "../lib/notification-buffer.js";
@@ -34,7 +38,7 @@ type ThreadOwnershipTemplateId =
 
 interface QueueParentSystemMessageBestEffortArgs {
   childThreadId: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   parentThreadId: string;
   reason: "assigned" | "removed";
   templateId: ThreadOwnershipTemplateId;
@@ -105,7 +109,7 @@ async function queueParentSystemMessageBestEffort(
 function buildThreadOwnershipSystemInput(
   templateId: ThreadOwnershipTemplateId,
   thread: ThreadLabelSource,
-): PromptInput[] {
+): RuntimePromptInput[] {
   const mention = buildParentSystemThreadMention({ thread });
   const renderedText = renderTemplate(templateId, {
     threadMention: THREAD_OWNERSHIP_MENTION_SLOT,

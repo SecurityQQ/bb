@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { defaultAppSettings, type PromptInput } from "@bb/domain";
+import { defaultAppSettings, type RuntimePromptInput } from "@bb/domain";
 import type { SendMessageDelivery } from "@bb/server-contract";
 import type {
   ComposerSelection,
@@ -432,7 +432,7 @@ function EmbeddedThreadChatWithComposer({
   );
 
   const defaultSendOrQueueInput = useCallback(
-    async (input: PromptInput[]) => {
+    async (input: RuntimePromptInput[]) => {
       if (shouldQueueFollowUpMessage(displayStatus)) {
         await createQueuedMessage.mutateAsync({
           id: threadId,

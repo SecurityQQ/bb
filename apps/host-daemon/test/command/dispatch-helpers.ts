@@ -14,7 +14,7 @@ import type {
   AvailableModel,
   DynamicTool,
   GitHostPullRequest,
-  PromptInput,
+  RuntimePromptInput,
 } from "@bb/domain";
 import type { HostDaemonBridgeLaunch } from "@bb/host-daemon-contract";
 import { makeWorkspaceMergeBase, makeWorkspaceStatus } from "@bb/test-helpers";
@@ -111,7 +111,7 @@ interface FakeRuntimeState {
   archivedProviderThreadId: string | undefined;
   archivedThreadId: string | undefined;
   ranTurnClientRequestId: ClientTurnRequestId | undefined;
-  ranTurnInput: PromptInput[] | undefined;
+  ranTurnInput: RuntimePromptInput[] | undefined;
   ranTurnText: string | undefined;
   renamedTitle: string | undefined;
   resumedBridgeLaunch: AgentRuntimeBridgeLaunch | undefined;
@@ -123,7 +123,7 @@ interface FakeRuntimeState {
   startedDynamicTools: DynamicTool[] | undefined;
   startedBridgeLaunch: AgentRuntimeBridgeLaunch | undefined;
   startedEnvironmentId: string | undefined;
-  startedInput: PromptInput[] | undefined;
+  startedInput: RuntimePromptInput[] | undefined;
   startedInstructions: string | undefined;
   startedThreadId: string | undefined;
   steeredClientRequestId: ClientTurnRequestId | undefined;

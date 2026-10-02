@@ -6,7 +6,7 @@ import {
   approvalInteractionOutcomeSchema,
   userQuestionInteractionOutcomeSchema,
   type DynamicTool,
-  type PromptInput,
+  type RuntimePromptInput,
   type ThreadDelta,
   type ProviderRateLimitState,
   sanitizeInheritedChildProcessEnv,
@@ -1817,7 +1817,7 @@ async function handleTurnStart(
     return;
   }
 
-  const input: PromptInput[] = params.input;
+  const input: RuntimePromptInput[] = params.input;
   const decoded = decodeCodexOptions(params.options);
 
   const prepared = session.translator.prepareTurnStart({

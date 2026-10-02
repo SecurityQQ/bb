@@ -31,6 +31,7 @@ describe("bb project command output", () => {
         request = new Request(input, init);
         return new Response(
           JSON.stringify({
+            id: "uploaded-attachment",
             type: "localFile",
             path: "payload-uploaded.bin",
             name: "renamed.bin",
@@ -76,6 +77,7 @@ describe("bb project command output", () => {
       expect(
         JSON.parse(String(vi.mocked(console.log).mock.calls[0]?.[0])),
       ).toEqual({
+        id: "uploaded-attachment",
         type: "localFile",
         path: "payload-uploaded.bin",
         name: "renamed.bin",

@@ -789,6 +789,18 @@ const INTENTIONAL_OPTIONAL_HOST_DAEMON_FIELDS: Record<string, string> = {
     "a dynamic tool's presentation carries a tint only when the plugin wants an accent colour; absence means the neutral row tint, which is not a colour value.",
   "hostDaemonCommandSchema.dynamicTools.presentation.title":
     "a dynamic tool's presentation has a title only when the call has a headline (a path, a query); absence means the label stands alone.",
+  "hostDaemonCommandSchema.input.attachmentId":
+    "Only uploaded inputs carry a destination attachment identity; runtime paths have no server attachment row.",
+  "hostDaemonCommandSchema.input.hostId":
+    "Only runtime-local inputs carry host provenance; uploaded inputs are staged onto the destination host.",
+  "hostDaemonCommandSchema.input.unavailableReason":
+    "Only unresolved historical draft references carry a failure reason; submission rejects them before dispatch.",
+  "hostDaemonCommandSchema.inputGroups.attachmentId":
+    "Only uploaded inputs carry a destination attachment identity; runtime paths have no server attachment row.",
+  "hostDaemonCommandSchema.inputGroups.hostId":
+    "Only runtime-local inputs carry host provenance; uploaded inputs are staged onto the destination host.",
+  "hostDaemonCommandSchema.inputGroups.unavailableReason":
+    "Only unresolved historical draft references carry a failure reason; submission rejects them before dispatch.",
   "hostDaemonCommandSchema.input.experimental_sourceProjectId":
     "a source project exists only on a portable server-facing attachment reference; the server copies it into the destination and strips this field before sending a daemon command.",
   "hostDaemonCommandSchema.input.mimeType":
@@ -1191,7 +1203,7 @@ const CONTRIBUTED_ENV = [
 
 describe("host-daemon command schemas", () => {
   it("uses the current host-daemon protocol version", () => {
-    expect(HOST_DAEMON_PROTOCOL_VERSION).toBe(227);
+    expect(HOST_DAEMON_PROTOCOL_VERSION).toBe(228);
     expect(HOST_ARTIFACT_MAX_BYTES).toBe(256 * 1024 * 1024);
   });
 

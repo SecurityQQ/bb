@@ -10,7 +10,7 @@ import { and, eq, isNull, or, sql } from "drizzle-orm";
 import {
   environmentMachineSelectionSchema,
   jsonValueSchema,
-  promptInputSchema,
+  runtimePromptInputSchema,
   resolvedThreadExecutionOptionsSchema,
   clientTurnRequestIdSchema,
 } from "@bb/domain";
@@ -43,8 +43,11 @@ export const threadProvisionCommonPayloadSchema = z.object({
   environmentIntent: threadProvisionEnvironmentIntentSchema,
   execution: resolvedThreadExecutionOptionsSchema.nullable(),
   fork: threadForkDescriptorSchema.nullable().default(null),
-  input: z.array(promptInputSchema),
-  inputGroups: z.array(z.array(promptInputSchema).min(1)).min(1).optional(),
+  input: z.array(runtimePromptInputSchema),
+  inputGroups: z
+    .array(z.array(runtimePromptInputSchema).min(1))
+    .min(1)
+    .optional(),
   titleProvided: z.boolean(),
   seedWithoutRun: z.boolean().default(false),
 });

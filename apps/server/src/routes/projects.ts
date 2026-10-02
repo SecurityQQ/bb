@@ -44,7 +44,11 @@ import { COMMAND_TIMEOUT_MS } from "../constants.js";
 import { ApiError } from "../errors.js";
 import {
   copyProjectAttachments,
+  referenceHistoryInput,
   readAttachment,
+  requireAttachmentById,
+  attachmentResource,
+  lookupAttachmentResource,
   storeAttachment,
 } from "../services/projects/attachments.js";
 import {
@@ -481,7 +485,7 @@ export function registerProjectRoutes(app: Hono, deps: AppDeps): void {
     return context.json(getProjectExecutionDefaults(deps.db, { projectId }));
   });
 
-  get(routes.promptHistory, (context, query) => {
+  get(routes.promptHistory, async (context, query) => {
     const projectId = context.req.param("id");
     requirePublicProject(deps.db, projectId);
     const limit = parseBoundedPositiveOptionalInteger({
@@ -491,12 +495,27 @@ export function registerProjectRoutes(app: Hono, deps: AppDeps): void {
       value: query.limit,
     });
 
-    return context.json(
-      listProjectPromptHistory(deps, {
-        projectId,
-        limit,
-      }),
-    );
+    const result = listProjectPromptHistory(deps, { projectId, limit });
+    if (context.req.header("x-bb-prompt-references") === "1") {
+      const entries = await Promise.all(
+        result.map(async (entry) => ({
+          ...entry,
+          input: await referenceHistoryInput(
+            deps.db,
+            deps.config.dataDir,
+            projectId,
+            entry.input,
+          ),
+        })),
+      );
+      return new Response(JSON.stringify(entries), {
+        headers: {
+          "content-type": "application/json",
+          vary: "x-bb-prompt-references",
+        },
+      });
+    }
+    return context.json(result);
   });
 
   patch(routes.update, async (context, payload) => {
@@ -945,6 +964,42 @@ export function registerProjectRoutes(app: Hono, deps: AppDeps): void {
       ),
       201,
     );
+  });
+
+  get(routes.lookupAttachment, async (context, query) => {
+    return context.json(
+      await lookupAttachmentResource(
+        deps.db,
+        deps.config.dataDir,
+        context.req.param("id"),
+        query.path,
+      ),
+    );
+  });
+
+  get(routes.getAttachment, (context) => {
+    return context.json(
+      attachmentResource(
+        requireAttachmentById(deps.db, context.req.param("id")),
+      ),
+    );
+  });
+
+  get(routes.attachmentContentById, async (context) => {
+    const row = requireAttachmentById(deps.db, context.req.param("id"));
+    const attachment = await readAttachment(
+      deps.config.dataDir,
+      row.projectId,
+      row.storedPath,
+    );
+    return new Response(new Uint8Array(attachment.content), {
+      headers: {
+        "content-type": attachment.mimeType ?? "application/octet-stream",
+        "content-length": String(attachment.content.byteLength),
+        "cache-control": ATTACHMENT_CONTENT_CACHE_CONTROL,
+        etag: attachment.etag,
+      },
+    });
   });
 
   post(routes.copyAttachments, async (context, payload) => {

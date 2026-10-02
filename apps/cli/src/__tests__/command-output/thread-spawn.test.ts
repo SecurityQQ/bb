@@ -178,6 +178,7 @@ describe("bb thread spawn command output", () => {
         vi.mocked(globalThis.fetch).mockResolvedValue(
           new Response(
             JSON.stringify({
+              id: "uploaded-attachment",
               type,
               path: uploadedPath,
               name: filename,
@@ -197,7 +198,7 @@ describe("bb thread spawn command output", () => {
             "--prompt",
             "review these",
             "--file",
-            "existing-report.pdf",
+            "attachment:existing-report",
             "--" + flag,
             fileUrl ? pathToFileURL(attachmentPath).href : attachmentPath,
           ],
@@ -226,8 +227,8 @@ describe("bb thread spawn command output", () => {
           json: expect.objectContaining({
             input: [
               { type: "text", text: "review these", mentions: [] },
-              { type: "localFile", path: "existing-report.pdf" },
-              { type, path: uploadedPath },
+              { type: "attachment", attachmentId: "existing-report" },
+              { type: "attachment", attachmentId: "uploaded-attachment" },
             ],
           }),
         });

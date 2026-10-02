@@ -1,5 +1,5 @@
 import { getAiServiceSelections, setAiServiceSelection } from "@bb/db";
-import { promptInputSchema, type AiTextTask } from "@bb/domain";
+import { runtimePromptInputSchema, type AiTextTask } from "@bb/domain";
 import type {
   SetAiServiceSelectionRequest,
   SystemAiServicesResponse,
@@ -26,7 +26,7 @@ type AiServicesViewDeps = Pick<
 >;
 
 const SAMPLE_TITLE_INPUT = [
-  promptInputSchema.parse({
+  runtimePromptInputSchema.parse({
     type: "text",
     text: "The settings page needs a dark mode toggle, and it should remember each user's choice across devices.",
   }),

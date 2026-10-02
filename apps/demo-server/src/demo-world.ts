@@ -7,7 +7,8 @@ import {
   isUiPreferenceKey,
   parseUiPreferenceValue,
   type UiPreferenceEntries,
-  type PromptInput,
+  runtimePromptInputSchema,
+  type RuntimePromptInput,
   type UiPreferenceKey,
   type ThreadChangedMessage,
   type ThreadQueuedMessage,
@@ -144,7 +145,7 @@ async function readJson(request: Request): Promise<unknown> {
   }
 }
 
-function promptText(input: readonly PromptInput[]): string {
+function promptText(input: readonly RuntimePromptInput[]): string {
   return input
     .flatMap((part) => (part.type === "text" ? [part.text] : []))
     .join("\n")
@@ -398,7 +399,9 @@ export class DemoWorld {
   ): Promise<Response | null> {
     const threadId = state.seed.id;
     if (sub === "send") {
-      const body = sendMessageRequestSchema.safeParse(await readJson(request));
+      const body = sendMessageRequestSchema
+        .extend({ input: z.array(runtimePromptInputSchema).min(1) })
+        .safeParse(await readJson(request));
       if (!body.success) return badRequest(body.error);
       this.appendTurn(state, promptText(body.data.input), now);
       return json({ ok: true });
@@ -415,9 +418,9 @@ export class DemoWorld {
       return json({ ok: true });
     }
     if (sub === "queued-messages") {
-      const body = createQueuedMessageRequestSchema.safeParse(
-        await readJson(request),
-      );
+      const body = createQueuedMessageRequestSchema
+        .extend({ input: z.array(runtimePromptInputSchema).min(1) })
+        .safeParse(await readJson(request));
       if (!body.success) return badRequest(body.error);
       const message = queuedMessage({
         id: `qm_demo${this.nextQueuedId++}`,

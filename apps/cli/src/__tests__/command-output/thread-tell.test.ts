@@ -273,7 +273,7 @@ describe("bb thread tell command output", () => {
         "add a README",
         "--plan",
         "--file",
-        "existing-report.pdf",
+        "attachment:existing-report",
       ],
       register,
     );
@@ -301,7 +301,7 @@ describe("bb thread tell command output", () => {
               },
             ],
           },
-          { type: "localFile", path: "existing-report.pdf" },
+          { type: "attachment", attachmentId: "existing-report" },
         ],
         mode: "steer-if-active",
       },
@@ -336,6 +336,7 @@ describe("bb thread tell command output", () => {
         vi.mocked(globalThis.fetch).mockResolvedValue(
           new Response(
             JSON.stringify({
+              id: "uploaded-attachment",
               type,
               path: uploadedPath,
               name: filename,
@@ -353,7 +354,7 @@ describe("bb thread tell command output", () => {
             "thread-attachments",
             "review these",
             "--file",
-            "existing-report.pdf",
+            "attachment:existing-report",
             "--" + flag,
             fileUrl ? pathToFileURL(attachmentPath).href : attachmentPath,
           ],
@@ -386,8 +387,8 @@ describe("bb thread tell command output", () => {
           json: {
             input: [
               { type: "text", text: "review these", mentions: [] },
-              { type: "localFile", path: "existing-report.pdf" },
-              { type, path: uploadedPath },
+              { type: "attachment", attachmentId: "existing-report" },
+              { type: "attachment", attachmentId: "uploaded-attachment" },
             ],
             mode: "steer-if-active",
           },

@@ -2,19 +2,19 @@ import { and, desc, eq } from "drizzle-orm";
 import { type DbConnection, events, promptHistoryEntries } from "@bb/db";
 import {
   arePromptHistoryInputsEqual,
-  promptInputSchema,
+  runtimePromptInputSchema,
   turnRequestEventDataSchema,
   type PromptHistoryScope,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { z } from "zod";
 import { expect } from "vitest";
 
-const storedPromptHistoryInputSchema = z.array(promptInputSchema).min(1);
+const storedPromptHistoryInputSchema = z.array(runtimePromptInputSchema).min(1);
 
 interface AssertPromptHistoryForTurnRequestArgs {
   db: DbConnection;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   scope: PromptHistoryScope;
   threadId: string;
 }

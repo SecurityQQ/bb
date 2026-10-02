@@ -1,4 +1,4 @@
-import type { PromptInput, ThreadEvent } from "@bb/domain";
+import type { RuntimePromptInput, ThreadEvent } from "@bb/domain";
 import {
   getThreadEventScopeTurnId,
   isThreadEventWithItem,
@@ -29,9 +29,9 @@ import type { ConformanceCheckResult } from "./types.js";
 
 export interface ConformanceSessionFixture {
   cwd: string;
-  promptInput: PromptInput[];
-  zeroWorkPromptInput?: PromptInput[];
-  interruptiblePromptInput?: PromptInput[];
+  promptInput: RuntimePromptInput[];
+  zeroWorkPromptInput?: RuntimePromptInput[];
+  interruptiblePromptInput?: RuntimePromptInput[];
   options?: Record<string, unknown>;
   icons?: { pluginId: string; names: readonly string[] };
 }

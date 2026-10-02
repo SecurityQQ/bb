@@ -1,6 +1,6 @@
 import { isStandaloneBuiltinClearCommand, type Thread } from "@bb/domain";
 import type {
-  SendMessageRequest,
+  RuntimeSendMessageRequest,
   SendMessageResponse,
 } from "@bb/server-contract";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
@@ -10,7 +10,7 @@ import { sendThreadMessage } from "./thread-send.js";
 import { assertThreadHostAcceptsWork } from "./thread-host-admission.js";
 
 interface AcceptThreadSendRequestArgs {
-  payload: SendMessageRequest;
+  payload: RuntimeSendMessageRequest;
   thread: Thread;
 }
 

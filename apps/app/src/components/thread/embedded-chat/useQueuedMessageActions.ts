@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { PromptInput, ThreadQueuedMessage } from "@bb/domain";
+import type { RuntimePromptInput, ThreadQueuedMessage } from "@bb/domain";
 import type { SendQueuedMessageMode } from "@bb/server-contract";
 import type {
   QueuedMessageGroupBoundaryRequest,
@@ -33,7 +33,7 @@ interface UseQueuedMessageActionsArgs {
   onSaveSuccess?: () => void;
   inlineEditingQueuedMessage: InlineQueuedMessageEditState | null;
   dismissInlineQueuedMessageEditor: () => void;
-  activeComposerDraftInput: PromptInput[];
+  activeComposerDraftInput: RuntimePromptInput[];
 }
 
 interface UseQueuedMessageActionsResult {

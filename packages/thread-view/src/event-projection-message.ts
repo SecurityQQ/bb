@@ -1,3 +1,4 @@
+import type { RuntimePromptInput } from "@bb/domain";
 import type {
   BackgroundTaskStatus,
   BackgroundTaskUsage,
@@ -112,6 +113,7 @@ export interface EventProjectionUserMessage extends EventProjectionMessageBase {
     imageUrls?: string[];
     localImagePaths?: string[];
     localFilePaths?: string[];
+    localReferences?: RuntimePromptInput[];
   };
 }
 

@@ -18,7 +18,7 @@ import {
   formatClientTurnRequestIdSuffix,
   threadScope,
   turnScope,
-  type PromptInput,
+  type RuntimePromptInput,
   type ThreadChangedMessage,
   type ThreadStatus,
 } from "@bb/domain";
@@ -38,7 +38,7 @@ const NO_ACTIVITY = {
   activeWorkflowCount: 0,
 };
 
-const planPromptInput: PromptInput[] = [
+const planPromptInput: RuntimePromptInput[] = [
   {
     type: "text",
     text: "/plan inspect the failing command",

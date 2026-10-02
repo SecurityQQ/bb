@@ -17,7 +17,7 @@ import {
   resolveRelativeLocalFileHref,
 } from "@/components/ui/markdown-local-file-link.js";
 import type { PromptMentionLinkResolver } from "@/components/promptbox/editor/prompt-mention-link";
-import { computeMutedPrefixLength } from "@bb/client-core";
+import { computeMutedPrefixLength, promptInputToDraft } from "@bb/client-core";
 import type { TimelineTitleActionResolver } from "./TimelineTitleView.js";
 import type {
   ThreadTimelineAddToChatHandler,
@@ -301,23 +301,34 @@ function CollapsibleMessageText({
 
 function buildAddToChatAttachments(
   attachments: TimelineConversationAttachments | null,
+  projectId: string | undefined,
 ): PromptDraftAttachment[] {
-  if (!attachments) {
-    return [];
-  }
-
+  if (!attachments) return [];
+  const known = promptInputToDraft(
+    attachments.localReferences ?? [],
+  ).attachments;
   return [
     ...attachments.localImagePaths.map((path) => ({
       type: "localImage" as const,
       path,
-      name: fileNameFromPath(path),
     })),
     ...attachments.localFilePaths.map((path) => ({
       type: "localFile" as const,
       path,
-      name: fileNameFromPath(path),
     })),
-  ];
+  ].map(
+    (item) =>
+      known.find((reference) => reference.path === item.path) ?? {
+        ...item,
+        name: fileNameFromPath(item.path),
+        ...(/^[\/]|^[A-Za-z][A-Za-z0-9+.-]*:/u.test(item.path)
+          ? {
+              unavailableReason:
+                "The original host was not recorded. Upload the file again.",
+            }
+          : { experimental_sourceProjectId: projectId }),
+      },
+  );
 }
 
 function UserConversationMessage({
@@ -638,8 +649,8 @@ export function ConversationMessageContent(
     [attachments, projectId, resolveUserAttachmentImageSrc],
   );
   const addToChatAttachments = useMemo(
-    () => buildAddToChatAttachments(attachments),
-    [attachments],
+    () => buildAddToChatAttachments(attachments, projectId),
+    [attachments, projectId],
   );
 
   if (props.role === "user") {

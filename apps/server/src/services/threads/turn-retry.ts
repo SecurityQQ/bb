@@ -3,13 +3,13 @@ import { permissionModeSchema } from "@bb/domain";
 import type {
   ClientTurnRequestId,
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   Thread,
 } from "@bb/domain";
 import type {
   RetryTurnRequest,
   RetryTurnResponse,
-  SendMessageRequest,
+  RuntimeSendMessageRequest,
 } from "@bb/server-contract";
 import { ApiError } from "../../errors.js";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
@@ -108,7 +108,7 @@ const CONTINUE_ACCEPTED_TURN_TEXT = "Please continue.";
 function retryInput(
   deps: Pick<TurnRetryDeps, "db">,
   args: { threadId: string; failed: FailedTurnRecord },
-): { input: PromptInput[]; inputGroups?: PromptInput[][] } {
+): { input: RuntimePromptInput[]; inputGroups?: RuntimePromptInput[][] } {
   if (wasFailedTurnInputAccepted(deps.db, args)) {
     return {
       input: [
@@ -121,7 +121,7 @@ function retryInput(
       ],
     };
   }
-  const agentOnly = (block: PromptInput): PromptInput => ({
+  const agentOnly = (block: RuntimePromptInput): RuntimePromptInput => ({
     ...block,
     visibility: "agent-only",
   });
@@ -146,8 +146,8 @@ function retryInput(
  */
 function retryExecution(failed: FailedTurnRecord): {
   model: string;
-  reasoningLevel: SendMessageRequest["reasoningLevel"];
-  serviceTier: SendMessageRequest["serviceTier"];
+  reasoningLevel: RuntimeSendMessageRequest["reasoningLevel"];
+  serviceTier: RuntimeSendMessageRequest["serviceTier"];
   permissionMode?: PermissionMode;
 } {
   const { execution } = failed.request;

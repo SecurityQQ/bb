@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   RuntimePermissionPolicy,
 } from "@get-bb/plugin-sdk/provider-bridge";
 import {
@@ -539,8 +539,7 @@ describe("buildCodexConfig", () => {
   it("disables provider user-input requests without overriding web search", () => {
     const config = configFor(FULL_OPTIONS);
 
-    expect(config).toMatchObject({
-    });
+    expect(config).toMatchObject({});
     expect(JSON.stringify(config)).not.toContain("tools.web_search");
   });
 
@@ -684,7 +683,7 @@ describe("toCodexDynamicTools", () => {
 
 describe("toCodexUserInput", () => {
   it("maps every prompt input variant, rendering local files as text", () => {
-    const input: PromptInput[] = [
+    const input: RuntimePromptInput[] = [
       { type: "text", text: "hello", mentions: [] },
       { type: "image", url: "https://example.com/a.png" },
       { type: "localImage", path: "/tmp/shot.png" },

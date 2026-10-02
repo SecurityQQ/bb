@@ -1,14 +1,21 @@
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 
-function textPrompt(text: string): PromptInput {
+function textPrompt(
+  text: string,
+): Extract<RuntimePromptInput, { type: "text" }> {
   return { type: "text", text, mentions: [] };
 }
 
-export function textInput(text: string): PromptInput[] {
+export function textInput(
+  text: string,
+): Extract<RuntimePromptInput, { type: "text" }>[] {
   return [textPrompt(text)];
 }
 
-export function skillInput(name: string, rest = ""): PromptInput[] {
+export function skillInput(
+  name: string,
+  rest = "",
+): Extract<RuntimePromptInput, { type: "text" }>[] {
   const command = `/${name}`;
   return [
     {

@@ -3,7 +3,7 @@ import type {
   ApprovalPendingInteractionResolution,
   JsonObject,
   OwnershipChangeOperationAction,
-  PromptInput,
+  RuntimePromptInput,
   ProviderErrorInfo,
   ThreadEventBackgroundTaskItem,
   ThreadEventFileChange,
@@ -87,7 +87,7 @@ interface PlanItemEventArgs {
   text: string;
 }
 
-const planPromptInput: PromptInput[] = [
+const planPromptInput: RuntimePromptInput[] = [
   {
     type: "text",
     text: "/plan inspect the failing command",

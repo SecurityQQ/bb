@@ -18,7 +18,7 @@ import {
   turnScope,
   type ClientTurnRequestId,
   type EnvironmentProviderSelection,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import {
   threadResponseSchema,
@@ -159,7 +159,7 @@ async function createIdleSeededFork(
   harness: TestAppHarness,
   args: {
     providerThreadId: string;
-    seed: PromptInput & { visibility: "agent-only" };
+    seed: RuntimePromptInput & { visibility: "agent-only" };
   },
 ) {
   const { sourceThread } = seedForkSource(harness);

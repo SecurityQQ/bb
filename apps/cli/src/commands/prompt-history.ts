@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import type { PromptHistoryListEntry } from "@bb/domain";
+import type { ReferencePromptHistoryListEntry } from "@bb/domain";
 import { action } from "../action.js";
 import { createCliBbSdk } from "../client.js";
 import { columnWidths, printBorderlessTable, truncateCell } from "../table.js";
@@ -13,7 +13,7 @@ interface PromptHistoryListOptions {
 
 const PROMPT_COLUMN_WIDTH = 80;
 
-function promptText(entry: PromptHistoryListEntry): string {
+function promptText(entry: ReferencePromptHistoryListEntry): string {
   return entry.input
     .map((part) => {
       switch (part.type) {
@@ -22,14 +22,20 @@ function promptText(entry: PromptHistoryListEntry): string {
         case "image":
         case "localImage":
           return "[image]";
+        case "attachment":
+          return `[attachment ${part.attachmentId}]`;
+        case "unavailableAttachment":
+          return `[unavailable ${part.path}]`;
         case "localFile":
-          return `[file ${part.name ?? part.path}]`;
+          return `[file ${part.path}]`;
       }
     })
     .join(" ");
 }
 
-function printPromptHistoryTable(entries: PromptHistoryListEntry[]): void {
+function printPromptHistoryTable(
+  entries: ReferencePromptHistoryListEntry[],
+): void {
   const rows = entries.map((entry) => [
     new Date(entry.createdAt).toISOString(),
     entry.threadId,

@@ -169,7 +169,7 @@ Context breakdowns are optional snapshots on `contextWindow` deltas:
 - `reasoningEffortsForLevels`
 - `reasoningLevelSchema`
 - `reasoningLevelValues`
-- `removeCommandMentionsFromPromptInput`
+- `removeCommandMentionsFromRuntimePromptInput`
 - `runBridgeRequest`
 - `runtimePermissionScopeValues`
 - `sanitizeInheritedChildProcessEnv`
@@ -257,7 +257,7 @@ Context breakdowns are optional snapshots on `contextWindow` deltas:
 - `PermissionEscalation`
 - `PermissionMode`
 - `PreparedProviderCommandDispatch`
-- `PromptInput`
+- `RuntimePromptInput`
 - `ProviderBridgeContext`
 - `ProviderBridgeDefinition`
 - `ProviderBridgeEntry`

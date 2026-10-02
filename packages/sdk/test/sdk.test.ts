@@ -505,6 +505,7 @@ describe("@bb/sdk", () => {
       forwardedRequest = new Request(input, { ...init, headers });
       return jsonResponse({
         body: {
+          id: "attachment-payload",
           type: "localFile",
           path: "payload-uploaded.bin",
           name: "payload.bin",
@@ -530,6 +531,7 @@ describe("@bb/sdk", () => {
         projectId: "proj_remote",
       }),
     ).resolves.toEqual({
+      id: "attachment-payload",
       type: "localFile",
       path: "payload-uploaded.bin",
       name: "payload.bin",
@@ -563,6 +565,7 @@ describe("@bb/sdk", () => {
     const responses = [
       jsonResponse({
         body: {
+          id: "attachment-pixel",
           type: "localImage",
           path: "pixel-uploaded.png",
           name: "pixel.png",

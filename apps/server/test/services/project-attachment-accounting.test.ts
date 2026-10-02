@@ -25,7 +25,7 @@ import {
   canonicalProjectAttachmentPath,
   projectAttachmentPaths,
   threadScope,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import {
   copyProjectAttachments,
@@ -49,7 +49,9 @@ const UNTIMED_BACKFILL_LIMITS = {
   maxSteps: PROJECT_ATTACHMENT_BACKFILL_LIMITS.maxSteps,
 };
 
-const input = (path: string): PromptInput[] => [{ type: "localFile", path }];
+const input = (path: string): RuntimePromptInput[] => [
+  { type: "localFile", path },
+];
 
 async function completeBackfill(h: TestAppHarness, projectId: string) {
   for (let count = 0; count < 200; count += 1) {

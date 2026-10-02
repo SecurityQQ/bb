@@ -1,6 +1,6 @@
 import { getThread } from "@bb/db";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   SystemMessageSubject,
   ToolCallResponse,
 } from "@bb/domain";
@@ -18,7 +18,7 @@ interface DeliverDetachedToolResultArgs {
 function buildDetachedToolResultInput(args: {
   toolName: string;
   response: ToolCallResponse;
-}): PromptInput[] {
+}): RuntimePromptInput[] {
   const lead = args.response.success
     ? `Your earlier ${args.toolName} tool call has finished. Its result:`
     : `Your earlier ${args.toolName} tool call failed:`;

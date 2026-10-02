@@ -64,6 +64,7 @@ const transcribingVoice: PromptVoiceConfig = {
 
 const mockAttachments: UploadedPromptAttachment[] = [
   {
+    id: crypto.randomUUID(),
     type: "localImage",
     path: "https://placecats.com/300/200",
     name: "screenshot.png",
@@ -71,6 +72,7 @@ const mockAttachments: UploadedPromptAttachment[] = [
     sizeBytes: 124_000,
   },
   {
+    id: crypto.randomUUID(),
     type: "localImage",
     path: "https://placecats.com/320/180",
     name: "design-mock.png",
@@ -78,6 +80,7 @@ const mockAttachments: UploadedPromptAttachment[] = [
     sizeBytes: 96_000,
   },
   {
+    id: crypto.randomUUID(),
     type: "localFile",
     path: "/uploads/diff.patch",
     name: "diff.patch",

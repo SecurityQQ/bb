@@ -3,7 +3,7 @@ import {
   encodeClientTurnRequestIdNumber,
   threadScope,
   turnScope,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { describe, expect, it, vi } from "vitest";
 import { registerHostRpcResponder } from "../helpers/host-rpc.js";
@@ -27,7 +27,7 @@ interface BannerFixture {
   threadId: string;
 }
 
-function clearCommandInput(): PromptInput[] {
+function clearCommandInput(): RuntimePromptInput[] {
   return [
     {
       type: "text",

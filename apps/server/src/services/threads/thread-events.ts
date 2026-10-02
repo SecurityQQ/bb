@@ -28,7 +28,7 @@ import { randomBytes } from "node:crypto";
 import type {
   ClientTurnRequestId,
   ClientTurnLifecycleEventData,
-  PromptInput,
+  RuntimePromptInput,
   ProvisioningTranscriptEntry,
   RecordedThreadExecutionOptions,
   SystemThreadProvisioningStatus,
@@ -82,8 +82,8 @@ interface ClientTurnRequestedEventArgs {
   environmentId: string | null;
   execution: ResolvedThreadExecutionOptions;
   initiator: ThreadTurnInitiator;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   requestMethod: "thread/start" | "turn/start";
   senderThreadId: string | null;
   source: "spawn" | "tell";

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createConnection, migrate, type DbConnection } from "@bb/db";
-import { type PromptInput } from "@bb/domain";
+import { type RuntimePromptInput } from "@bb/domain";
 import type { Logger } from "@bb/logger";
 import { createAiServiceRegistry } from "../../../src/services/ai/ai-service-registry.js";
 import {
@@ -122,7 +122,7 @@ async function writePlugin(
 function pluginMentionInput(args: {
   text: string;
   mentions: Array<{ label: string; itemId: string; pluginId?: string }>;
-}): PromptInput[] {
+}): RuntimePromptInput[] {
   return [
     {
       type: "text",

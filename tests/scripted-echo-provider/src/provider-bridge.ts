@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
   type ClientTurnRequestId,
   type PendingInteractionPayload,
-  type PromptInput,
+  type RuntimePromptInput,
   type ThreadDelta,
   BRIDGE_INBOUND_REQUEST_METHODS,
   BRIDGE_JSON_RPC_ERRORS,
@@ -255,10 +255,10 @@ interface TurnPlan {
   settleBackgroundTasks: boolean;
 }
 
-function promptText(input: readonly PromptInput[]): string {
+function promptText(input: readonly RuntimePromptInput[]): string {
   return input
     .filter(
-      (item): item is Extract<PromptInput, { type: "text" }> =>
+      (item): item is Extract<RuntimePromptInput, { type: "text" }> =>
         item.type === "text",
     )
     .map((item) => item.text)
@@ -521,7 +521,7 @@ function scheduleCompletion(
 
 function beginTurn(args: {
   session: Session;
-  input: readonly PromptInput[];
+  input: readonly RuntimePromptInput[];
   clientRequestId?: ClientTurnRequestId;
 }): void {
   const { session } = args;

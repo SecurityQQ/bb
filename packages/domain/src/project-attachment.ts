@@ -1,4 +1,4 @@
-import { type PromptInput } from "./shared-types.js";
+import { type RuntimePromptInput } from "./shared-types.js";
 
 export class ProjectAttachmentError extends Error {}
 
@@ -49,7 +49,7 @@ function resolvableAttachmentPath(path: string): string[] {
 }
 
 function referencedAttachmentPath(
-  item: PromptInput,
+  item: RuntimePromptInput,
   mode: ProjectAttachmentOwnershipMode,
 ): string[] {
   if (item.type !== "localImage" && item.type !== "localFile") return [];
@@ -59,7 +59,7 @@ function referencedAttachmentPath(
 }
 
 export function projectAttachmentPaths(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
   mode: ProjectAttachmentOwnershipMode = "required",
 ): string[] {
   return [

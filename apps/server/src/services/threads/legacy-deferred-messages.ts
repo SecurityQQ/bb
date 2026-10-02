@@ -2,12 +2,12 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { getThread } from "@bb/db";
 import {
-  promptInputSchema,
+  runtimePromptInputSchema,
   systemMessageKindSchema,
   systemMessageSubjectSchema,
 } from "@bb/domain";
 import { sendMessageRequestSchema } from "@bb/server-contract";
-import type { SendMessageRequest } from "@bb/server-contract";
+import type { RuntimeSendMessageRequest } from "@bb/server-contract";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
 import { runtimeErrorLogFields } from "../lib/error-log-fields.js";
 import { queueParentSystemMessage } from "./parent-system-messages.js";
@@ -38,12 +38,12 @@ const legacyDeferredPayloadSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("send"),
     request: z
-      .object({ input: z.array(promptInputSchema).min(1) })
+      .object({ input: z.array(runtimePromptInputSchema).min(1) })
       .passthrough(),
   }),
   z.object({
     kind: z.literal("parent-system"),
-    input: z.array(promptInputSchema),
+    input: z.array(runtimePromptInputSchema),
     systemMessageKind: systemMessageKindSchema,
     systemMessageSubject: systemMessageSubjectSchema.nullable(),
   }),
@@ -67,7 +67,7 @@ function legacyDeferredTableExists(
 
 function toSendPayload(
   request: z.infer<(typeof legacyDeferredPayloadSchema.options)[0]>["request"],
-): SendMessageRequest {
+): RuntimeSendMessageRequest {
   // A deferred message's moment has passed, so its old delivery mode carries
   // no intent worth preserving: `auto` steers a running turn and starts an
   // idle one, which is the only sensible reading a week later.
@@ -76,7 +76,7 @@ function toSendPayload(
     mode: "auto",
   });
   return revalidated.success
-    ? revalidated.data
+    ? { ...revalidated.data, input: request.input }
     : { input: request.input, mode: "auto" };
 }
 

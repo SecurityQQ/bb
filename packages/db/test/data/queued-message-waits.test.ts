@@ -11,7 +11,7 @@
  * two can never disagree.
  */
 import { describe, expect, it } from "vitest";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import { noopNotifier } from "../../src/notifier.js";
 import {
   claimQueuedThreadMessageGroup,
@@ -32,7 +32,7 @@ import {
 import { upsertHost } from "../../src/data/hosts.js";
 import { createMigratedConnection } from "../helpers/migrated-connection.js";
 
-function textInput(text: string): PromptInput[] {
+function textInput(text: string): RuntimePromptInput[] {
   return [{ type: "text", text, mentions: [] }];
 }
 

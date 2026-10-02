@@ -62,7 +62,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Transform } from "@dnd-kit/utilities";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   PromptTextMention,
   ThreadQueuedMessage,
 } from "@bb/domain";
@@ -460,10 +460,10 @@ export function queuedMessageSortingStrategy(
 }
 
 function visibleQueuedMessageTextChunks(
-  input: readonly PromptInput[],
-): Extract<PromptInput, { type: "text" }>[] {
+  input: readonly RuntimePromptInput[],
+): Extract<RuntimePromptInput, { type: "text" }>[] {
   return input.filter(
-    (chunk): chunk is Extract<PromptInput, { type: "text" }> =>
+    (chunk): chunk is Extract<RuntimePromptInput, { type: "text" }> =>
       chunk.type === "text" && chunk.visibility !== "agent-only",
   );
 }
@@ -525,7 +525,7 @@ function trimQueuedMessagePreviewTextRange({
 }
 
 function buildQueuedMessagePreviewText(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): QueuedMessagePreviewText {
   let text = "";
   const mentions: PromptTextMention[] = [];

@@ -12,7 +12,7 @@ import {
 } from "@bb/db";
 import {
   pathLooksRuntimeReadable,
-  promptInputSchema,
+  runtimePromptInputSchema,
   takeVisiblePromptHistoryEntries,
   type PromptHistoryEntry,
   type PromptHistoryListEntry,
@@ -25,7 +25,7 @@ import { z } from "zod";
 import { toThreadQueuedMessage } from "./threads/thread-queued-messages.js";
 import type { AppDeps } from "../types.js";
 
-const storedPromptHistoryInputSchema = z.array(promptInputSchema).min(1);
+const storedPromptHistoryInputSchema = z.array(runtimePromptInputSchema).min(1);
 
 interface PromptHistoryArgs {
   limit: number;

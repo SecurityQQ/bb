@@ -466,7 +466,7 @@ export function registerActionsCommands(
             ...(expectedRequestSequence !== undefined
               ? { expectedRequestSequence }
               : {}),
-            input: buildPromptInputs({ message }),
+            input: [{ type: "text", text: message, mentions: [] }],
             ...(senderThreadId !== undefined ? { senderThreadId } : {}),
           });
           if (outputJson(opts, { threadId, ...result })) {

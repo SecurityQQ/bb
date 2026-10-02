@@ -1,3 +1,4 @@
+import { hydratePromptHistory } from "@/lib/prompt-references";
 import { prependOlderTimelineRows } from "@bb/client-core";
 import {
   useInfiniteQuery,
@@ -773,10 +774,12 @@ export function useThreadPromptHistory(
   return useQuery<PromptHistoryResponse>({
     queryKey: threadPromptHistoryQueryKey(id),
     queryFn: ({ signal }) =>
-      sdk.threads.promptHistory({
-        threadId: requireThreadId(id, "useThreadPromptHistory"),
-        signal,
-      }),
+      sdk.threads
+        .promptHistory({
+          threadId: requireThreadId(id, "useThreadPromptHistory"),
+          signal,
+        })
+        .then(hydratePromptHistory),
     enabled,
     refetchOnMount: options?.refetchOnMount ?? true,
     staleTime: options?.staleTime ?? PROMPT_HISTORY_STALE_TIME_MS,

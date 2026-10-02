@@ -1,5 +1,5 @@
 import type {
-  PromptInput,
+  RuntimePromptInput,
   ResolvedThreadExecutionOptions,
   SystemMessageKind,
   SystemMessageSubject,
@@ -31,8 +31,8 @@ interface DispatchTurnDuringReprovisionArgs {
   environment: EnvironmentRow;
   execution: ResolvedThreadExecutionOptions;
   initiator: ThreadTurnInitiator;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   senderThreadId: string | null;
   systemMessageKind?: SystemMessageKind;
   systemMessageSubject?: SystemMessageSubject | null;

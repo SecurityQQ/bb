@@ -1,9 +1,9 @@
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 
 interface PromptTextInputArgs {
   text: string;
 }
 
-export function promptTextInput(args: PromptTextInputArgs): PromptInput {
+export function promptTextInput(args: PromptTextInputArgs): RuntimePromptInput {
   return { type: "text", text: args.text, mentions: [] };
 }

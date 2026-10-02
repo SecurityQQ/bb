@@ -1,6 +1,6 @@
 import type {
   JsonObject,
-  PromptInput,
+  RuntimePromptInput,
   StartedOnBehalfOf,
   ThreadCreateOrigin,
   ThreadOriginKind,
@@ -22,7 +22,7 @@ export interface ThreadCreateServiceRequestInput {
    * waiting on the clock.
    */
   sendAt?: CreateThreadRequest["sendAt"];
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   pluginMetadata?: CreateThreadRequest["pluginMetadata"];
   pluginSubmission?: CreateThreadRequest["pluginSubmission"];
   sectionId?: CreateThreadRequest["sectionId"];

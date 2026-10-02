@@ -11,7 +11,7 @@ import type {
 import {
   BRIDGE_INBOUND_REQUEST_METHODS,
   type PendingInteractionResolution,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@get-bb/plugin-sdk/provider-bridge";
 
 const { forkSessionMock, queryMock } = vi.hoisted(() => ({
@@ -256,7 +256,7 @@ const APPROVAL_RESOLUTION: PendingInteractionResolution = {
   grantedPermissions: null,
 };
 
-function promptInput(text: string): PromptInput[] {
+function promptInput(text: string): RuntimePromptInput[] {
   return [{ type: "text", text, mentions: [] }];
 }
 

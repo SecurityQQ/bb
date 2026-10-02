@@ -12,7 +12,7 @@ import {
   promptHistoryEntries,
   upsertHost,
 } from "@bb/db";
-import type { PromptHistoryScope, PromptInput } from "@bb/domain";
+import type { PromptHistoryScope, RuntimePromptInput } from "@bb/domain";
 import {
   listProjectPromptHistory,
   listThreadPromptHistory,
@@ -25,7 +25,7 @@ type TestDb = ReturnType<typeof createConnection>;
 interface InsertPromptHistoryEntryArgs {
   createdAt: number;
   db: TestDb;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   projectId: string;
   requestSequence: number;
   scope: PromptHistoryScope;

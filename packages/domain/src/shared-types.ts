@@ -179,7 +179,7 @@ export const promptTextMentionSchema = z.object({
 });
 export type PromptTextMention = z.infer<typeof promptTextMentionSchema>;
 
-export const promptInputSchema = z.discriminatedUnion("type", [
+export const runtimePromptInputSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("text"),
     text: z.string(),
@@ -195,23 +195,52 @@ export const promptInputSchema = z.discriminatedUnion("type", [
     type: z.literal("localImage"),
     path: z.string(),
     experimental_sourceProjectId: z.string().min(1).optional(),
+    hostId: z.string().min(1).optional(),
+    attachmentId: z.string().min(1).optional(),
+    unavailableReason: z.string().optional(),
     ...promptInputVisibilityFields,
   }),
   z.object({
     type: z.literal("localFile"),
     path: z.string(),
     experimental_sourceProjectId: z.string().min(1).optional(),
+    hostId: z.string().min(1).optional(),
+    attachmentId: z.string().min(1).optional(),
+    unavailableReason: z.string().optional(),
     name: z.string().optional(),
     sizeBytes: z.number().int().nonnegative().optional(),
     mimeType: z.string().optional(),
     ...promptInputVisibilityFields,
   }),
 ]);
+export type RuntimePromptInput = z.infer<typeof runtimePromptInputSchema>;
+
+export const promptInputSchema = z.discriminatedUnion("type", [
+  runtimePromptInputSchema.options[0],
+  runtimePromptInputSchema.options[1],
+  z.object({
+    type: z.literal("attachment"),
+    attachmentId: z.string().min(1),
+    ...promptInputVisibilityFields,
+  }),
+  z.object({
+    type: z.literal("localImage"),
+    hostId: z.string().min(1),
+    path: z.string().regex(/^(?:\/|[A-Za-z]:[\\/]|\\\\)/u),
+    ...promptInputVisibilityFields,
+  }),
+  z.object({
+    type: z.literal("localFile"),
+    hostId: z.string().min(1),
+    path: z.string().regex(/^(?:\/|[A-Za-z]:[\\/]|\\\\)/u),
+    ...promptInputVisibilityFields,
+  }),
+]);
 export type PromptInput = z.infer<typeof promptInputSchema>;
 
 export function flattenPromptInputGroups(
-  inputGroups: readonly PromptInput[][],
-): PromptInput[] {
+  inputGroups: readonly RuntimePromptInput[][],
+): RuntimePromptInput[] {
   return inputGroups.flatMap((group, index) =>
     index === 0
       ? group
@@ -224,7 +253,7 @@ interface PromptCommandSelector {
   name: string;
 }
 
-type TextPromptInput = Extract<PromptInput, { type: "text" }>;
+type TextPromptInput = Extract<RuntimePromptInput, { type: "text" }>;
 
 interface PromptCommandRemovalRange {
   start: number;
@@ -243,7 +272,7 @@ function isSelectedPromptCommandMention(
 }
 
 function isStandaloneBuiltinCommand(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
   name: string,
 ): boolean {
   const selector = { trigger: "/" as const, name };
@@ -279,18 +308,18 @@ function isStandaloneBuiltinCommand(
 }
 
 export function isStandaloneBuiltinCompactCommand(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): boolean {
   return isStandaloneBuiltinCommand(input, "compact");
 }
 
 export function isStandaloneBuiltinClearCommand(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): boolean {
   return isStandaloneBuiltinCommand(input, "clear");
 }
 
-export function createStandaloneBuiltinCompactCommandInput(): PromptInput[] {
+export function createStandaloneBuiltinCompactCommandInput(): RuntimePromptInput[] {
   return [
     {
       type: "text",
@@ -344,7 +373,7 @@ export function createBuiltinPlanCommandTextInput(
 }
 
 export function promptInputHasCommandMention(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
   selector: PromptCommandSelector,
 ): boolean {
   return input.some(
@@ -429,9 +458,9 @@ function removeCommandMentionsFromTextInput(
 }
 
 export function removeCommandMentionsFromPromptInput(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
   selector: PromptCommandSelector,
-): PromptInput[] {
+): RuntimePromptInput[] {
   return input.map((item) =>
     item.type === "text"
       ? removeCommandMentionsFromTextInput(item, selector)

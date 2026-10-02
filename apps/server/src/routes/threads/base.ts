@@ -1,3 +1,4 @@
+import { normalizeIncomingPromptInput } from "../../services/projects/attachments.js";
 import { countUnarchivedThreadDescendants } from "../../services/threads/thread-archive.js";
 import { cancelAbandonedProviderCreations } from "../../services/threads/thread-environment-providers.js";
 import {
@@ -351,13 +352,22 @@ export function registerThreadBaseRoutes(app: Hono, deps: AppDeps): void {
     }
     const thread = await createThreadFromRequest(deps, {
       ...payload,
+      input: normalizeIncomingPromptInput(deps.db, payload.input),
       origin: payload.origin,
     });
     return context.json(toThreadResponseFromThread(deps, { thread }), 201);
   });
 
   post(routes.fork, async (context, payload) => {
-    const thread = await createThreadForkFromRequest(deps, payload);
+    const thread = await createThreadForkFromRequest(deps, {
+      ...payload,
+      input: payload.input
+        ? normalizeIncomingPromptInput(deps.db, payload.input)
+        : undefined,
+      agentContextSeed: payload.agentContextSeed
+        ? normalizeIncomingPromptInput(deps.db, payload.agentContextSeed)
+        : undefined,
+    });
     return context.json(toThreadResponseFromThread(deps, { thread }), 201);
   });
 

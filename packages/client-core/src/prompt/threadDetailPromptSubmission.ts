@@ -1,22 +1,22 @@
 import type {
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   ReasoningLevel,
   ServiceTier,
   ThreadRuntimeDisplayStatus,
 } from "@bb/domain";
 import type {
-  CreateQueuedMessageRequest,
+  RuntimeCreateQueuedMessageRequest,
   ExistingThreadExecutionInputSources,
-  SendMessageRequest,
+  RuntimeSendMessageRequest,
 } from "@bb/server-contract";
 import type { FollowUpSubmitMode } from "./follow-up-submit-mode.js";
 
-export interface SendMessageMutationRequest extends SendMessageRequest {
+export interface SendMessageMutationRequest extends RuntimeSendMessageRequest {
   id: string;
 }
 
-export interface CreateQueuedFollowUpRequest extends CreateQueuedMessageRequest {
+export interface CreateQueuedFollowUpRequest extends RuntimeCreateQueuedMessageRequest {
   id: string;
 }
 
@@ -46,7 +46,7 @@ interface SharedThreadExecutionRequestFields {
 }
 
 interface BaseFollowUpRequestArgs {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   threadId: string;
 }
 

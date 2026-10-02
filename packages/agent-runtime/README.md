@@ -163,7 +163,7 @@ local path); the provider id is an opaque label here.
 
 ## Dependencies
 
-- `@bb/domain` — shared types (ThreadEvent, PromptInput, ToolCallRequest, etc.)
+- `@bb/domain` — shared types (ThreadEvent, RuntimePromptInput, ToolCallRequest, etc.)
 - `@bb/provider-bridge-protocol` — the bridge wire contract, the `thread/delta` assembler, and the bridge kit
 - `@bb/process-utils` — child-process helpers
 - `zod` — schema validation at provider boundaries

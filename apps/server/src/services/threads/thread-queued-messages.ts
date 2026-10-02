@@ -1,11 +1,11 @@
 import {
-  promptInputSchema,
+  runtimePromptInputSchema,
   queuedMessageWaitingOnSchema,
   threadQueuedMessageSchema,
 } from "@bb/domain";
 import type {
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   QueuedMessagePayload,
   QueuedMessagePayloadKind,
   QueuedMessageWaitingOn,
@@ -47,7 +47,7 @@ interface StoredQueuedThreadMessageRow {
 
 function parseStoredQueuedThreadMessageContent(
   row: Pick<StoredQueuedThreadMessageRow, "content" | "id" | "threadId">,
-): PromptInput[] {
+): RuntimePromptInput[] {
   let content: unknown;
   try {
     content = JSON.parse(row.content);
@@ -59,7 +59,7 @@ function parseStoredQueuedThreadMessageContent(
     );
   }
 
-  const parsed = z.array(promptInputSchema).min(1).safeParse(content);
+  const parsed = z.array(runtimePromptInputSchema).min(1).safeParse(content);
   if (!parsed.success) {
     throw new ApiError(
       500,

@@ -13,8 +13,8 @@ import {
   type RunningThreadRow,
 } from "@bb/db";
 import {
-  promptInputSchema,
-  type PromptInput,
+  runtimePromptInputSchema,
+  type RuntimePromptInput,
   type QueuedMessagePayload,
   type QueuedMessageWaitingOn,
   type ResolvedThreadExecutionOptions,
@@ -24,7 +24,7 @@ import {
   type ThreadCreateOrigin,
   type ThreadQueuedMessage,
 } from "@bb/domain";
-import type { SendMessageRequest } from "@bb/server-contract";
+import type { RuntimeSendMessageRequest } from "@bb/server-contract";
 import type {
   MessageDispatchHookContext,
   PluginDispatchEnvironmentIntent,
@@ -92,7 +92,7 @@ export const pendingThreadStartContextSchema = z.object({
   environmentIntent: threadProvisionEnvironmentIntentSchema,
   fork: threadForkDescriptorSchema.nullable(),
   /** Provider-facing input when it differs from the persisted start seed. */
-  providerInput: z.array(promptInputSchema).optional(),
+  providerInput: z.array(runtimePromptInputSchema).optional(),
   startedOnBehalfOf: startedOnBehalfOfSchema.nullable(),
   titleProvided: z.boolean(),
 });
@@ -217,7 +217,7 @@ export type DispatchAttemptSource =
 
 export interface DispatchAttemptArgs {
   thread: Thread;
-  payload: SendMessageRequest & { inputGroups?: PromptInput[][] };
+  payload: RuntimeSendMessageRequest & { inputGroups?: RuntimePromptInput[][] };
   source: DispatchAttemptSource;
   /**
    * The start context creation just wrote, on the attempt that is creating the
@@ -252,7 +252,7 @@ export type DispatchAttemptOutcome =
  */
 export function resolveDispatchAttemptKind(
   thread: Thread,
-  mode: SendMessageRequest["mode"],
+  mode: RuntimeSendMessageRequest["mode"],
 ): DispatchAttemptKind {
   if (thread.status !== "active") return "start-turn";
   return mode === "steer" || mode === "steer-if-active" || mode === "auto"
@@ -678,7 +678,7 @@ function consumeClaimedRows(
 
 interface AdmitPendingThreadArgs {
   claimed: ClaimedQueuedThreadMessageRow[] | null;
-  payload: SendMessageRequest & { inputGroups?: PromptInput[][] };
+  payload: RuntimeSendMessageRequest & { inputGroups?: RuntimePromptInput[][] };
   respectManualStopPause: boolean;
   /** Creation's own record; null on a re-attempt, which reads it back. */
   startContext: PendingThreadStartContext | null;
@@ -818,9 +818,9 @@ async function launchAdmittedThread(
  * queue drain has always used to replay a frozen tuple.
  */
 function resolveExecutionIntoPayload(
-  payload: SendMessageRequest & { inputGroups?: PromptInput[][] },
+  payload: RuntimeSendMessageRequest & { inputGroups?: RuntimePromptInput[][] },
   execution: ResolvedThreadExecutionOptions,
-): SendMessageRequest & { inputGroups?: PromptInput[][] } {
+): RuntimeSendMessageRequest & { inputGroups?: RuntimePromptInput[][] } {
   return {
     ...payload,
     model: execution.model,

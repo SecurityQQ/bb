@@ -1,5 +1,5 @@
 import type {
-  PromptInput,
+  RuntimePromptInput,
   SystemMessageSubject,
   ThreadEventTurnStatus,
   ChildThreadOutcome,
@@ -335,7 +335,7 @@ function childThreadTurnStatusBatchTaxonomy(
 
 export function buildChildThreadTurnStatusBatchInput(
   args: BuildChildThreadTurnStatusBatchInputArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   const lines = buildChildThreadTurnStatusBatchLines(args);
   const renderedText = renderTemplate("systemMessageChildThreadOutcomeBatch", {
     updates: CHILD_THREAD_OUTCOME_BATCH_UPDATES_SLOT,
@@ -349,7 +349,7 @@ export function buildChildThreadTurnStatusBatchInput(
 
 export function buildChildThreadNeedsAttentionInput(
   args: BuildChildThreadNeedsAttentionInputArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   const mention = buildParentSystemThreadMention({
     thread: args.childThread,
   });

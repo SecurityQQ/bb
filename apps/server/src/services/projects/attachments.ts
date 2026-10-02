@@ -12,6 +12,9 @@ import {
 } from "@bb/db";
 import {
   canonicalProjectAttachmentPath,
+  ProjectAttachmentError,
+  promptInputSchema,
+  runtimePromptInputSchema,
   pathLooksRuntimeReadable,
   PROMPT_ATTACHMENT_MAX_BYTES,
 } from "@bb/domain";
@@ -26,8 +29,14 @@ import {
 } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { resolveContainedPath } from "@bb/process-utils";
-import type { PromptInput } from "@bb/domain";
-import type { UploadedPromptAttachment } from "@bb/server-contract";
+import type {
+  RuntimePromptInput,
+  ReferencePromptHistoryEntry,
+} from "@bb/domain";
+import type {
+  UploadedPromptAttachment,
+  IncomingPromptInput,
+} from "@bb/server-contract";
 import mimeTypes from "mime-types";
 import { ApiError } from "../../errors.js";
 import { requirePublicProject } from "../lib/entity-lookup.js";
@@ -42,7 +51,7 @@ const HEIF_IMAGE_MIME_TYPES = new Set([
 interface ResolvePromptAttachmentReferencesArgs {
   db: DbConnection;
   dataDir: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   projectId: string;
 }
 
@@ -191,10 +200,186 @@ export async function inventoryAttachmentReferences(
   }
 }
 
+export async function referenceHistoryInput(
+  db: DbConnection,
+  dataDir: string,
+  projectId: string,
+  input: readonly RuntimePromptInput[],
+): Promise<ReferencePromptHistoryEntry["input"]> {
+  return Promise.all(
+    input.map(
+      async (item): Promise<ReferencePromptHistoryEntry["input"][number]> => {
+        if (item.type !== "localFile" && item.type !== "localImage")
+          return item;
+        const visibility = item.visibility
+          ? { visibility: item.visibility }
+          : {};
+        if (pathLooksRuntimeReadable(item.path)) {
+          if (item.hostId)
+            return {
+              type: item.type,
+              hostId: item.hostId,
+              path: item.path,
+              ...visibility,
+            };
+          return {
+            type: "unavailableAttachment",
+            path: item.path,
+            reason:
+              "The original host was not recorded. Upload the file again.",
+          };
+        }
+        try {
+          const attachment = await lookupAttachmentResource(
+            db,
+            dataDir,
+            projectId,
+            item.path,
+          );
+          return {
+            type: "attachment",
+            attachmentId: attachment.id,
+            ...visibility,
+          };
+        } catch (error) {
+          if (
+            !(error instanceof ApiError) &&
+            !(error instanceof ProjectAttachmentError)
+          )
+            throw error;
+          return {
+            type: "unavailableAttachment",
+            path: item.path,
+            reason: "The uploaded attachment is unavailable or has expired.",
+          };
+        }
+      },
+    ),
+  );
+}
+
+export function resolvePromptHost(
+  input: RuntimePromptInput[],
+  hostId: string | null,
+): RuntimePromptInput[] {
+  return input.map((item) => {
+    if (
+      (item.type !== "localFile" && item.type !== "localImage") ||
+      !pathLooksRuntimeReadable(item.path)
+    )
+      return item;
+    if (item.unavailableReason)
+      throw new ApiError(400, "attachment_unavailable", item.unavailableReason);
+    if (
+      hostId === null ||
+      (item.hostId !== undefined && item.hostId !== hostId)
+    ) {
+      throw new ApiError(
+        400,
+        "invalid_request",
+        "Local attachments require the destination host; upload the file to use it on another host",
+      );
+    }
+    return { ...item, hostId };
+  });
+}
+
+export function requireAttachmentById(
+  db: DbConnection,
+  id: string,
+): ProjectAttachmentRow {
+  const row = db
+    .select()
+    .from(projectAttachments)
+    .where(eq(projectAttachments.id, id))
+    .get();
+  if (!row || row.readyAt === null || row.deletionClaimedAt !== null) {
+    throw new ApiError(
+      400,
+      "attachment_unavailable",
+      "Attachment is unavailable or has expired",
+    );
+  }
+  requirePublicProject(db, row.projectId);
+  return row;
+}
+
+export function attachmentResource(
+  row: ProjectAttachmentRow,
+): UploadedPromptAttachment {
+  return {
+    id: row.id,
+    type: row.mimeType?.startsWith("image/") ? "localImage" : "localFile",
+    path: row.storedPath,
+    experimental_sourceProjectId: row.projectId,
+    name: row.originalName,
+    mimeType: row.mimeType ?? "application/octet-stream",
+    sizeBytes: row.sizeBytes,
+  };
+}
+
+export async function lookupAttachmentResource(
+  db: DbConnection,
+  dataDir: string,
+  projectId: string,
+  path: string,
+): Promise<UploadedPromptAttachment> {
+  requirePublicProject(db, projectId);
+  await ensureAttachmentReferenceExists(db, dataDir, projectId, path);
+  const row = getProjectAttachment(
+    db,
+    projectId,
+    canonicalProjectAttachmentPath(path),
+  );
+  if (!row) throw missingAttachmentReferenceError(path);
+  return attachmentResource(requireAttachmentById(db, row.id));
+}
+
+export function normalizeIncomingPromptInput(
+  db: DbConnection,
+  input: readonly IncomingPromptInput[],
+): RuntimePromptInput[] {
+  return input.map((item) => {
+    if (item.type !== "attachment") {
+      if (item.type !== "localFile" && item.type !== "localImage") return item;
+      if (
+        item.hostId !== undefined &&
+        !promptInputSchema.safeParse(item).success
+      ) {
+        throw new ApiError(
+          400,
+          "invalid_request",
+          "Host file references require an absolute path",
+        );
+      }
+      const {
+        attachmentId: _attachmentId,
+        unavailableReason: _unavailableReason,
+        ...legacy
+      } = runtimePromptInputSchema.options[
+        item.type === "localImage" ? 2 : 3
+      ].parse(item);
+      return legacy;
+    }
+    const row = requireAttachmentById(db, item.attachmentId);
+    const { type: _type, attachmentId: _attachmentId, ...visibility } = item;
+    return {
+      ...visibility,
+      type: row.mimeType?.startsWith("image/") ? "localImage" : "localFile",
+      path: row.storedPath,
+      experimental_sourceProjectId: row.projectId,
+      attachmentId: row.id,
+      name: row.originalName,
+      sizeBytes: row.sizeBytes,
+      mimeType: row.mimeType ?? "application/octet-stream",
+    };
+  });
+}
+
 export async function resolvePromptAttachmentReferences(
   args: ResolvePromptAttachmentReferencesArgs,
-): Promise<PromptInput[]> {
-  const resolved: PromptInput[] = [];
+): Promise<RuntimePromptInput[]> {
+  const resolved: RuntimePromptInput[] = [];
   const copies = new Map<string, Set<string>>();
   for (const input of args.input) {
     if (input.type !== "localFile" && input.type !== "localImage") {
@@ -239,7 +424,30 @@ export async function resolvePromptAttachmentReferences(
       [...paths],
     );
   }
-  return resolved;
+  return resolved.map((item) => {
+    if (
+      (item.type !== "localFile" && item.type !== "localImage") ||
+      pathLooksRuntimeReadable(item.path)
+    )
+      return item;
+    const row = getProjectAttachment(
+      args.db,
+      args.projectId,
+      canonicalProjectAttachmentPath(item.path),
+    );
+    if (!row) throw missingAttachmentReferenceError(item.path);
+    return {
+      ...item,
+      attachmentId: row.id,
+      ...(item.type === "localFile"
+        ? {
+            name: row.originalName,
+            sizeBytes: row.sizeBytes,
+            mimeType: row.mimeType ?? "application/octet-stream",
+          }
+        : {}),
+    };
+  });
 }
 
 function formatMegabytes(bytes: number): string {
@@ -292,6 +500,7 @@ export async function storeAttachment(
   );
 
   return {
+    id: getProjectAttachment(db, projectId, storedName)!.id,
     type: isImage ? "localImage" : "localFile",
     experimental_sourceProjectId: projectId,
     path: storedName,

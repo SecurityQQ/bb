@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import {
   collectInvokedPromptCommands,
   deriveTitleFallback,
@@ -7,7 +7,7 @@ import {
   shouldGenerateThreadTitle,
 } from "../../src/services/threads/title-generation.js";
 
-function textInput(text: string): PromptInput {
+function textInput(text: string): RuntimePromptInput {
   return {
     type: "text",
     text,
@@ -15,7 +15,7 @@ function textInput(text: string): PromptInput {
   };
 }
 
-function skillInput(name: string, rest = ""): PromptInput {
+function skillInput(name: string, rest = ""): RuntimePromptInput {
   const command = `/${name}`;
   return {
     type: "text",
@@ -55,7 +55,7 @@ describe("thread title generation", () => {
   });
 
   it("counts words across text input parts and ignores attachments", () => {
-    const input: PromptInput[] = [
+    const input: RuntimePromptInput[] = [
       textInput("fix the flaky"),
       {
         type: "localFile",

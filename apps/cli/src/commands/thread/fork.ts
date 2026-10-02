@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import {
   threadVisibilitySchema,
-  type PromptInput,
+  type RuntimePromptInput,
   type Thread,
 } from "@bb/domain";
 import type { EnvironmentArgs } from "@bb/server-contract";
@@ -50,7 +50,7 @@ function parseSourceSeqEnd(value: string | undefined): number | undefined {
 
 async function buildForkInput(
   opts: ThreadForkCommandOptions,
-): Promise<PromptInput[] | undefined> {
+): Promise<RuntimePromptInput[] | undefined> {
   const files = opts.file ?? [];
   const images = opts.image ?? [];
   const prompt = await resolveTextInput({
@@ -66,8 +66,8 @@ async function buildForkInput(
     return buildPromptInputs({ message: prompt, files, images });
   }
   return [
-    ...files.map((path): PromptInput => ({ type: "localFile", path })),
-    ...images.map((path): PromptInput => ({ type: "localImage", path })),
+    ...files.map((path): RuntimePromptInput => ({ type: "localFile", path })),
+    ...images.map((path): RuntimePromptInput => ({ type: "localImage", path })),
   ];
 }
 

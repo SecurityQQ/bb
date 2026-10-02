@@ -1,7 +1,7 @@
 import {
   jsonValueSchema,
   type PermissionEscalation,
-  type PromptInput,
+  type RuntimePromptInput,
   type ReasoningLevel,
   type RuntimePermissionPolicy,
   type ServiceTier,
@@ -560,7 +560,9 @@ function toCodexReasoningEffort(
   return codexEffort;
 }
 
-export function toCodexUserInput(input: PromptInput[]): CodexUserInput[] {
+export function toCodexUserInput(
+  input: RuntimePromptInput[],
+): CodexUserInput[] {
   return input.map((chunk): CodexUserInput => {
     switch (chunk.type) {
       case "text":

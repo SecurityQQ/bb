@@ -2,7 +2,7 @@ import { Command } from "commander";
 import { updateThreadTabsRequestSchema } from "@bb/server-contract";
 import {
   queuedMessageWaitHolderSchema,
-  type PromptInput,
+  type RuntimePromptInput,
   type QueuedMessageWaitHolder,
 } from "@bb/domain";
 import type { ThreadQueuedMessagesResult } from "@bb/sdk";
@@ -136,7 +136,7 @@ function printQueueTable(rows: ThreadQueuedMessagesResult): void {
   }
 }
 
-function queuedMessagePreview(content: PromptInput[]): string {
+function queuedMessagePreview(content: RuntimePromptInput[]): string {
   const text = content
     .filter((block) => block.type === "text")
     .map((block) => block.text)

@@ -13,7 +13,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useComposedRefs } from "@radix-ui/react-compose-refs";
 import { TimelineImageGallery } from "./TimelineImageGallery";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   ThreadOriginKind,
   ThreadRuntimeDisplayStatus,
 } from "@bb/domain";
@@ -928,7 +928,7 @@ const ConversationRowContent = memo(function ConversationRowContent({
       (row.attachments?.imageUrls.length ?? 0) === 0;
     const onEdit = canEditMessage
       ? () => {
-          const input: PromptInput[] = [];
+          const input: RuntimePromptInput[] = [];
           if (row.text.trim().length > 0) {
             input.push({
               type: "text",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import {
   formatQueuedMessagePreview,
   queuedInputToDraft,
@@ -7,7 +7,7 @@ import {
 
 describe("threadQueuedMessages", () => {
   it("formats queued-message previews from text or attachment-only inputs", () => {
-    const input: PromptInput[] = [
+    const input: RuntimePromptInput[] = [
       { type: "text", text: "  First line  ", mentions: [] },
       { type: "text", text: "Second line", mentions: [] },
     ];

@@ -1,7 +1,7 @@
 import { environments, hasStoredSpawnAgentToolCall, threads } from "@bb/db";
 import { and, eq, isNull } from "drizzle-orm";
 import {
-  PromptInput,
+  RuntimePromptInput,
   PromptMode,
   ProjectExecutionDefaults,
   PermissionEscalation,
@@ -73,8 +73,8 @@ export interface ThreadStartCommandArgs {
   execution: ResolvedThreadExecutionOptions;
   fork: ThreadForkDescriptor | null;
   permissionEscalation: PermissionEscalation;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   projectId: string;
   providerId: string;
   requestId: ClientTurnRequestId;
@@ -91,8 +91,8 @@ interface PreparedTurnSubmitCommandBuildArgs {
   hostId: string;
   execution: ResolvedThreadExecutionOptions;
   permissionEscalation: PermissionEscalation;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   providerThreadId: string;
   runtimeContext: ResolvedThreadRuntimeCommandConfig;
   target: TurnSubmitTarget;
@@ -103,8 +103,8 @@ interface PrepareTurnSubmitCommandPayloadArgs {
   environment: ThreadRuntimeCommandEnvironment;
   execution: ResolvedThreadExecutionOptions;
   permissionEscalation: PermissionEscalation;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   providerThreadId?: string;
   target: TurnSubmitTarget;
   thread: Thread;
@@ -124,7 +124,7 @@ interface RuntimeExecutionOptionsArgs {
   deps: Pick<AppDeps, "db" | "providerRegistry">;
   execution: ResolvedThreadExecutionOptions;
   hostId: string;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   permissionEscalation: PermissionEscalation;
   projectId: string;
   providerId: string;
@@ -178,7 +178,7 @@ function providerSupportsThreadArchiveForwarding(
 
 function resolvePromptMode(
   registry: ProviderRegistryService,
-  args: { input: PromptInput[]; providerId: string },
+  args: { input: RuntimePromptInput[]; providerId: string },
 ): PromptMode | undefined {
   const planCommand = resolveProviderPlanCommand(registry, args.providerId);
   if (planCommand === null) return undefined;

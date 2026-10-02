@@ -142,7 +142,13 @@ describe("project attachments", () => {
         projectId: "proj_test",
         input: [{ type: "localFile", path: "notes-uploaded.txt" }],
       }),
-    ).resolves.toEqual([{ type: "localFile", path: "notes-uploaded.txt" }]);
+    ).resolves.toMatchObject([
+      {
+        type: "localFile",
+        path: "notes-uploaded.txt",
+        attachmentId: expect.any(String),
+      },
+    ]);
   });
 
   it("rejects relative prompt attachment paths that were not uploaded", async () => {

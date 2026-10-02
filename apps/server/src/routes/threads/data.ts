@@ -1,3 +1,4 @@
+import { referenceHistoryInput } from "../../services/projects/attachments.js";
 import { extractThreadContextWindowUsage } from "@bb/thread-view";
 import { clearTimelineOrderingContextCache } from "../../services/threads/timeline-context-order.js";
 import {
@@ -447,7 +448,7 @@ export function registerThreadDataRoutes(app: Hono, deps: AppDeps): void {
     );
   });
 
-  get(routes.promptHistory, (context, query) => {
+  get(routes.promptHistory, async (context, query) => {
     const threadId = context.req.param("id");
     requirePublicThread(deps.db, threadId);
     const limit = parseBoundedPositiveOptionalInteger({
@@ -457,12 +458,27 @@ export function registerThreadDataRoutes(app: Hono, deps: AppDeps): void {
       value: query.limit,
     });
 
-    return context.json(
-      listThreadPromptHistory(deps, {
-        threadId,
-        limit,
-      }),
-    );
+    const result = listThreadPromptHistory(deps, { threadId, limit });
+    if (context.req.header("x-bb-prompt-references") === "1") {
+      const entries = await Promise.all(
+        result.map(async (entry) => ({
+          ...entry,
+          input: await referenceHistoryInput(
+            deps.db,
+            deps.config.dataDir,
+            requirePublicThread(deps.db, threadId).projectId,
+            entry.input,
+          ),
+        })),
+      );
+      return new Response(JSON.stringify(entries), {
+        headers: {
+          "content-type": "application/json",
+          vary: "x-bb-prompt-references",
+        },
+      });
+    }
+    return context.json(result);
   });
 
   get(routes.events, (context, query) => {

@@ -29,7 +29,7 @@ import type {
   EnvironmentProviderSelection,
   EnvironmentStatus,
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   QueuedMessageWaitingOn,
   RecordedPermissionMode,
   StoredThreadEventDataForType,
@@ -262,7 +262,7 @@ export function seedThreadFixture(
 export function seedQueuedMessage(
   deps: Pick<AppDeps, "db" | "hub">,
   args: {
-    content: PromptInput[];
+    content: RuntimePromptInput[];
     threadId: string;
     model?: string;
     reasoningLevel?: string;

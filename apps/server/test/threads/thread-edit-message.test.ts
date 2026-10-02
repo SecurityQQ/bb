@@ -13,7 +13,7 @@ import {
   encodeClientTurnRequestIdNumber,
   threadScope,
   turnScope,
-  type PromptInput,
+  type RuntimePromptInput,
   type ThreadEventTurnStatus,
   type ThreadStatus,
 } from "@bb/domain";
@@ -86,9 +86,9 @@ function seedTurn(
     providerThreadId: string;
     providerCheckpointId?: string;
     completionStatus?: ThreadEventTurnStatus | null;
-    inputGroups?: PromptInput[][];
+    inputGroups?: RuntimePromptInput[][];
     initiator?: "agent" | "user";
-    leadingAgentOnlyInput?: PromptInput[];
+    leadingAgentOnlyInput?: RuntimePromptInput[];
     requestSequence: number;
     senderThreadId?: string;
     text: string;
@@ -196,7 +196,7 @@ function seedEditableThread(
     firstProviderCheckpoint?: string | null;
     firstProviderThreadId?: string;
     firstTurnId?: string;
-    firstTurnLeadingAgentOnlyInput?: PromptInput[];
+    firstTurnLeadingAgentOnlyInput?: RuntimePromptInput[];
     includeIdentity?: boolean;
     includeSecondTurn?: boolean;
     providerId?: string;

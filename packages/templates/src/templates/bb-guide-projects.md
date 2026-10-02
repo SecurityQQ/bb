@@ -66,11 +66,13 @@ Attachments:
     --client-file <path>                  Path read on this CLI machine
     --filename <name>                     Attachment filename override
     --mime-type <type>                    MIME override (otherwise inferred)
+  bb project attachment show <attachment-id> Show metadata by attachment ID
   bb project attachment download <id> <attachment-path>
     --client-file <path>                  Destination on this CLI machine
 
   Uploads use multipart bytes and return a server-managed attachment DTO. Pass
-  its relative `path` to thread --file/--image input. Thread --file and --image
+  `attachment:<id>` to thread --file/--image input to reuse it across projects.
+  Legacy relative `path` tokens still work within their owning project. Thread --file and --image
   upload absolute paths and file: URLs from the CLI machine automatically;
   relative values remain existing server attachment paths.
   image/* uploads are limited to 10MB; other files are limited to 25MB.

@@ -8,7 +8,7 @@ import {
   THREAD_DELTA_NOTIFICATION_METHOD,
   approvalInteractionOutcomeSchema,
   interactionRequestPayloadSchema,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@get-bb/plugin-sdk/provider-bridge";
 import {
   experimental_createBridgeDeltaEventCollector as createBridgeDeltaEventCollector,
@@ -268,7 +268,7 @@ const SCRIPT: (ScriptedNotification | ScriptedRequest)[][] = [
   ],
 ];
 
-function promptInput(text: string): PromptInput[] {
+function promptInput(text: string): RuntimePromptInput[] {
   return [{ type: "text", text, mentions: [] }];
 }
 

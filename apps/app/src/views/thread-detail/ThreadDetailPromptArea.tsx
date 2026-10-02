@@ -24,7 +24,7 @@ import type {
   ReasoningLevel,
   ServiceTier,
   PendingInteraction,
-  PromptInput,
+  RuntimePromptInput,
   ThreadQueuedMessage,
   ThreadPullRequest,
   ThreadTimelineActivePromptMode,
@@ -170,7 +170,7 @@ export interface ThreadDetailSentMessageEdit {
   onCancel: () => void;
   onSubmit: (target: {
     execution: FollowUpExecutionSelection;
-    input: PromptInput[];
+    input: RuntimePromptInput[];
   }) => void;
   updateDraft: (
     update: (current: PromptDraftState) => PromptDraftState,

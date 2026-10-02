@@ -1,3 +1,5 @@
+import { createPromptReferences } from "@/lib/prompt-references";
+import type { RuntimePromptInput } from "@bb/domain";
 import { createCoreComposerActions } from "@/lib/plugin-composer-handle";
 import { usePendingAttachmentUploads } from "./usePendingAttachmentUploads";
 import { useInitialPromptDraft } from "./mentions/initial-prompt-draft";
@@ -1629,7 +1631,9 @@ export function NewThreadComposer({
         ...executionInputSources,
         ...seededExecutionInputSources,
       };
-      const request: NewThreadComposerSubmission = {
+      const request: Omit<NewThreadComposerSubmission, "input"> & {
+        input: RuntimePromptInput[];
+      } = {
         projectId,
         providerId: selectedProviderId,
         model: selectedThreadModel,
@@ -1653,7 +1657,10 @@ export function NewThreadComposer({
       const clearedSubmittedDraft =
         promptDraft.clearIfCurrentMatches(submittedDraft);
       try {
-        await onSubmit(request);
+        await onSubmit({
+          ...request,
+          input: await createPromptReferences(request),
+        });
         clearReuseEnvironment();
       } catch (submitError) {
         if (clearedSubmittedDraft) {

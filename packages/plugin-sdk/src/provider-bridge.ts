@@ -24,12 +24,12 @@
  * section 2) — bridges no longer construct `ThreadEvent`s, so the domain
  * event vocabulary is NOT re-exported here. What remains from `@bb/domain` is
  * the command-plane and interaction surface the protocol's params are made of
- * (PromptInput, permission/interaction payloads, dynamic tools, rate limits,
+ * (RuntimePromptInput, permission/interaction payloads, dynamic tools, rate limits,
  * reasoning levels) plus the enum/status types the delta shapes reference
  * (item status, turn status, plan steps, usage breakdowns). Those live in
  * `@bb/domain` — bb's persisted vocabulary shared by the server, the app and
  * the runtime — so the SDK names them here and the published bundle inlines
- * them, exactly as the root export already does for `PromptInput` and
+ * them, exactly as the root export already does for `RuntimePromptInput` and
  * friends.
  *
  * Runtime, not stubs: unlike `@get-bb/plugin-sdk` and `@get-bb/plugin-sdk/host`
@@ -356,7 +356,7 @@ export type {
   PendingInteractionUserQuestionQuestion,
   PermissionEscalation,
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   ProviderErrorCategory,
   ProviderErrorInfo,
   ProviderRawEvent,

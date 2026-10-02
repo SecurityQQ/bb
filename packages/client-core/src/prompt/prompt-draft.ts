@@ -1,6 +1,6 @@
 import {
   promptTextMentionSchema,
-  type PromptInput,
+  type RuntimePromptInput,
   type PromptTextMention,
 } from "@bb/domain";
 import { uploadedPromptAttachmentSchema } from "@bb/server-contract";
@@ -8,6 +8,9 @@ import { z } from "zod";
 
 const promptDraftAttachmentSchema = uploadedPromptAttachmentSchema.extend({
   sizeBytes: z.number().nonnegative().optional(),
+  id: z.string().min(1).optional(),
+  hostId: z.string().min(1).optional(),
+  unavailableReason: z.string().optional(),
 });
 
 export type PromptDraftAttachment = z.infer<typeof promptDraftAttachmentSchema>;
@@ -195,8 +198,10 @@ export function normalizePromptTextMentions(
     .sort((left, right) => left.start - right.start || left.end - right.end);
 }
 
-export function promptDraftToInput(draft: PromptDraftState): PromptInput[] {
-  const input: PromptInput[] = [];
+export function promptDraftToInput(
+  draft: PromptDraftState,
+): RuntimePromptInput[] {
+  const input: RuntimePromptInput[] = [];
 
   const trimStartLength = draft.text.length - draft.text.trimStart().length;
   const trimEndIndex = draft.text.trimEnd().length;
@@ -226,6 +231,11 @@ export function promptDraftToInput(draft: PromptDraftState): PromptInput[] {
       input.push({
         type: "localImage",
         path: attachment.path,
+        ...(attachment.unavailableReason
+          ? { unavailableReason: attachment.unavailableReason }
+          : {}),
+        ...(attachment.id ? { attachmentId: attachment.id } : {}),
+        ...(attachment.hostId ? { hostId: attachment.hostId } : {}),
         ...(attachment.experimental_sourceProjectId !== undefined
           ? {
               experimental_sourceProjectId:
@@ -239,6 +249,11 @@ export function promptDraftToInput(draft: PromptDraftState): PromptInput[] {
     input.push({
       type: "localFile",
       path: attachment.path,
+      ...(attachment.unavailableReason
+        ? { unavailableReason: attachment.unavailableReason }
+        : {}),
+      ...(attachment.id ? { attachmentId: attachment.id } : {}),
+      ...(attachment.hostId ? { hostId: attachment.hostId } : {}),
       ...(attachment.experimental_sourceProjectId !== undefined
         ? {
             experimental_sourceProjectId:
@@ -257,7 +272,7 @@ export function promptDraftToInput(draft: PromptDraftState): PromptInput[] {
 }
 
 export function promptInputToDraft(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): PromptDraftState {
   const textSegments: string[] = [];
   const mentions: PromptTextMention[] = [];
@@ -293,6 +308,11 @@ export function promptInputToDraft(
       attachments.push({
         type: "localImage",
         path: chunk.path,
+        ...(chunk.unavailableReason
+          ? { unavailableReason: chunk.unavailableReason }
+          : {}),
+        ...(chunk.attachmentId ? { id: chunk.attachmentId } : {}),
+        ...(chunk.hostId ? { hostId: chunk.hostId } : {}),
         ...(chunk.experimental_sourceProjectId !== undefined
           ? { experimental_sourceProjectId: chunk.experimental_sourceProjectId }
           : {}),
@@ -305,6 +325,11 @@ export function promptInputToDraft(
       attachments.push({
         type: "localFile",
         path: chunk.path,
+        ...(chunk.unavailableReason
+          ? { unavailableReason: chunk.unavailableReason }
+          : {}),
+        ...(chunk.attachmentId ? { id: chunk.attachmentId } : {}),
+        ...(chunk.hostId ? { hostId: chunk.hostId } : {}),
         ...(chunk.experimental_sourceProjectId !== undefined
           ? { experimental_sourceProjectId: chunk.experimental_sourceProjectId }
           : {}),

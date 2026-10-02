@@ -4,7 +4,10 @@ import {
   isStandaloneBuiltinClearCommand,
   isStandaloneBuiltinCompactCommand,
 } from "../src/shared-types.js";
-import type { PromptInput, PromptMentionCommandOrigin } from "../src/index.js";
+import type {
+  RuntimePromptInput,
+  PromptMentionCommandOrigin,
+} from "../src/index.js";
 
 function promptCommandInput(
   name: string,
@@ -12,7 +15,7 @@ function promptCommandInput(
     origin?: PromptMentionCommandOrigin;
     text?: string;
   },
-): PromptInput {
+): RuntimePromptInput {
   const commandText = `/${name}`;
   const text = args?.text ?? commandText;
   const start = text.indexOf(commandText);
@@ -40,7 +43,7 @@ function promptCommandInput(
   };
 }
 
-function promptTextInput(text: string): PromptInput {
+function promptTextInput(text: string): RuntimePromptInput {
   return { type: "text", text, mentions: [] };
 }
 

@@ -1,5 +1,5 @@
 import { listEvents, listQueuedThreadMessages } from "@bb/db";
-import { threadScope, turnScope, type PromptInput } from "@bb/domain";
+import { threadScope, turnScope, type RuntimePromptInput } from "@bb/domain";
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../src/errors.js";
 import { runQueuedMessageDispatch } from "../../src/services/threads/queued-message-dispatch.js";
@@ -130,7 +130,7 @@ function seedArchivedConcurrentStartPair(
   });
 }
 
-const CLEAR_COMMAND_INPUT: PromptInput[] = [
+const CLEAR_COMMAND_INPUT: RuntimePromptInput[] = [
   {
     type: "text",
     text: "/clear",
@@ -156,7 +156,7 @@ async function sendUserMessage(
   harness: TestAppHarness,
   args: {
     environment: Parameters<typeof sendThreadMessage>[1]["environment"];
-    input?: PromptInput[];
+    input?: RuntimePromptInput[];
     thread: Parameters<typeof sendThreadMessage>[1]["thread"];
   },
 ): Promise<void> {

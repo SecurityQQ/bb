@@ -1,3 +1,8 @@
+import { z } from "zod";
+import {
+  referencePromptHistoryEntrySchema,
+  type ReferencePromptHistoryEntry,
+} from "@bb/domain";
 import {
   parseThreadEventRow,
   type PromptInput,
@@ -25,7 +30,6 @@ import type {
   EditMessageResponse,
   ForkThreadRequest,
   DeleteThreadRequest,
-  PromptHistoryResponse,
   SendQueuedMessageResponse,
   ThreadArchiveAllResponse,
   ThreadChildSummaryResponse,
@@ -194,7 +198,7 @@ export type ThreadArchiveAllResult = ThreadArchiveAllResponse;
 export type ThreadReadStateResult = ThreadResponse;
 export type ThreadRestoreEnvironmentResult = ThreadResponse;
 export type ThreadPinOrderResult = ThreadListResponse;
-export type ThreadPromptHistoryResult = PromptHistoryResponse;
+export type ThreadPromptHistoryResult = ReferencePromptHistoryEntry[];
 export type ThreadQueuedMessagesResult = ThreadQueuedMessageListResponse;
 export type ThreadQueuedMessageCreateResult = ThreadQueuedMessage;
 export type ThreadQueuedMessageUpdateResult = ThreadQueuedMessage;
@@ -1261,15 +1265,22 @@ export function createThreadsArea(args: CreateSdkAreaArgs): ThreadsArea {
       );
     },
     async promptHistory(input) {
-      return transport.readJson(
-        transport.api.v1.threads[":id"]["prompt-history"].$get(
-          {
-            param: { id: input.threadId },
-            query: { limit: input.limit },
-          },
-          ...signalRequestArgs(input.signal),
-        ),
-      );
+      return transport
+        .readJson(
+          transport.api.v1.threads[":id"]["prompt-history"].$get(
+            {
+              param: { id: input.threadId },
+              query: { limit: input.limit },
+            },
+            {
+              headers: { "x-bb-prompt-references": "1" },
+              init: { signal: input.signal },
+            },
+          ),
+        )
+        .then((result) =>
+          z.array(referencePromptHistoryEntrySchema).parse(result),
+        );
     },
     queuedMessages,
     async reorderPinned(input) {

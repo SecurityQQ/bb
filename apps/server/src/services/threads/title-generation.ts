@@ -2,7 +2,7 @@ import { renderTemplate } from "@bb/templates";
 import { getThread, updateThread } from "@bb/db";
 import {
   removeCommandMentionsFromPromptInput,
-  type PromptInput,
+  type RuntimePromptInput,
   type PromptMentionCommandTrigger,
 } from "@bb/domain";
 import {
@@ -26,7 +26,7 @@ interface ApplyGeneratedThreadTitleArgs {
 }
 
 interface ThreadMetadataGenerationArgs {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   threadId: string;
 }
 
@@ -47,7 +47,7 @@ export interface ThreadMetadataGenerationOutcome {
   reason?: ThreadMetadataGenerationOutcomeReason;
 }
 
-function cleanPromptText(input: PromptInput[]): string {
+function cleanPromptText(input: RuntimePromptInput[]): string {
   return input
     .filter((part) => part.type === "text")
     .map((part) => part.text.trim())
@@ -67,7 +67,9 @@ function clampPromptText(text: string): string {
   return `${body}${TITLE_FALLBACK_ELLIPSIS}`;
 }
 
-export function deriveTitleFallback(input: PromptInput[]): string | null {
+export function deriveTitleFallback(
+  input: RuntimePromptInput[],
+): string | null {
   const text = cleanPromptText(input);
   if (text.length === 0) {
     return null;
@@ -81,7 +83,7 @@ interface InvokedPromptCommand {
 }
 
 export function collectInvokedPromptCommands(
-  input: PromptInput[],
+  input: RuntimePromptInput[],
 ): InvokedPromptCommand[] {
   const seen = new Set<string>();
   return input.flatMap((part) =>
@@ -103,11 +105,11 @@ export function collectInvokedPromptCommands(
 }
 
 function promptTextWithoutCommands(
-  input: PromptInput[],
+  input: RuntimePromptInput[],
   commands: InvokedPromptCommand[],
 ): string {
   return cleanPromptText(
-    commands.reduce<PromptInput[]>(
+    commands.reduce<RuntimePromptInput[]>(
       (remaining, command) =>
         removeCommandMentionsFromPromptInput(remaining, command),
       input,
@@ -121,7 +123,9 @@ function formatInvokedCommands(commands: InvokedPromptCommand[]): string {
     .join(", ");
 }
 
-export function shouldGenerateThreadTitle(input: PromptInput[]): boolean {
+export function shouldGenerateThreadTitle(
+  input: RuntimePromptInput[],
+): boolean {
   const text = cleanPromptText(input);
   if (text.length === 0) {
     return false;
@@ -156,7 +160,9 @@ export function sanitizeGeneratedBranchSlug(value: string): string | null {
   return slug.length > 0 ? slug : null;
 }
 
-export function buildThreadTitlePrompt(input: PromptInput[]): string | null {
+export function buildThreadTitlePrompt(
+  input: RuntimePromptInput[],
+): string | null {
   const fallback = deriveTitleFallback(input);
   if (!fallback) {
     return null;

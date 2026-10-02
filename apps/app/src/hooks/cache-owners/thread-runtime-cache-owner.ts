@@ -9,7 +9,7 @@ import type {
   ThreadWithRuntime,
 } from "@bb/domain";
 import type {
-  CreateQueuedMessageRequest,
+  RuntimeCreateQueuedMessageRequest,
   PromptHistoryResponse,
   SendMessageResponse,
   SendQueuedMessageResponse,
@@ -20,7 +20,7 @@ import type {
   ThreadTimelineResponse,
   TimelineConversationAttachments,
   TimelineRow,
-  UpdateQueuedMessageRequest,
+  RuntimeUpdateQueuedMessageRequest,
 } from "@bb/server-contract";
 import type { AppCreateThreadRequest } from "@bb/client-core";
 import { OPTIMISTIC_TIMELINE_ROW_ID_PREFIX } from "@bb/client-core";
@@ -95,7 +95,7 @@ interface SendThreadMessageTransactionArgs {
   request: SendThreadMessageMutationRequest;
 }
 
-interface CreateQueuedMessageRequestWithThreadId extends CreateQueuedMessageRequest {
+interface CreateQueuedMessageRequestWithThreadId extends RuntimeCreateQueuedMessageRequest {
   id: string;
 }
 
@@ -104,7 +104,7 @@ interface CreateQueuedMessageTransactionArgs {
   request: CreateQueuedMessageRequestWithThreadId;
 }
 
-interface UpdateQueuedMessageRequestWithThreadId extends UpdateQueuedMessageRequest {
+interface UpdateQueuedMessageRequestWithThreadId extends RuntimeUpdateQueuedMessageRequest {
   id: string;
   queuedMessageId: string;
 }
@@ -898,8 +898,9 @@ export function applyCreateThreadResult({
   const cachedHostId =
     environmentId === null
       ? null
-      : (queryClient.getQueryData<Environment>(environmentQueryKey(environmentId))
-          ?.hostId ?? null);
+      : (queryClient.getQueryData<Environment>(
+          environmentQueryKey(environmentId),
+        )?.hostId ?? null);
   const selectedHostId =
     request.environment.type === "provider" &&
     request.environment.machine?.type === "existing"
@@ -912,14 +913,17 @@ export function applyCreateThreadResult({
     thread,
     cachedHostId ?? selectedHostId,
   );
-  prependProjectPromptHistory(
-    queryClient,
-    request.projectId,
-    buildAcceptedPromptHistoryEntry({
-      createdAt: thread.createdAt,
-      input: request.input,
-    }),
-  );
+  const historyInput = request.input;
+  if (historyInput.every((item) => item.type !== "attachment")) {
+    prependProjectPromptHistory(
+      queryClient,
+      request.projectId,
+      buildAcceptedPromptHistoryEntry({
+        createdAt: thread.createdAt,
+        input: historyInput,
+      }),
+    );
+  }
   invalidateProjectPromptHistoryQueries({
     queryClient,
     projectId: request.projectId,

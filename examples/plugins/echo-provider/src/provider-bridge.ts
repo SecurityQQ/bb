@@ -2,7 +2,7 @@ import {
   type ClientTurnRequestId,
   type DeltaPresentation,
   type DynamicTool,
-  type PromptInput,
+  type RuntimePromptInput,
   type ProviderHealthResult,
   type ThreadDelta,
   type ThreadEventTokenUsageBreakdown,
@@ -96,10 +96,10 @@ function sendRequest(method: string, params: Record<string, unknown>): string {
   return id;
 }
 
-function promptText(input: readonly PromptInput[]): string {
+function promptText(input: readonly RuntimePromptInput[]): string {
   return input
     .filter(
-      (item): item is Extract<PromptInput, { type: "text" }> =>
+      (item): item is Extract<RuntimePromptInput, { type: "text" }> =>
         item.type === "text",
     )
     .map((item) => item.text)
@@ -136,7 +136,7 @@ function itemId(turn: TurnContext, name: string): string {
 
 function runEchoTurn(args: {
   session: Session;
-  input: readonly PromptInput[];
+  input: readonly RuntimePromptInput[];
   options: unknown;
   clientRequestId?: ClientTurnRequestId;
 }): void {

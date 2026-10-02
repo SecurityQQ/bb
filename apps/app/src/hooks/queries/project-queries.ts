@@ -1,3 +1,4 @@
+import { hydratePromptHistory } from "@/lib/prompt-references";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import type {
@@ -175,10 +176,12 @@ export function useProjectPromptHistory(
   return useQuery<PromptHistoryResponse>({
     queryKey: projectPromptHistoryQueryKey(projectId),
     queryFn: ({ signal }) =>
-      sdk.projects.promptHistory({
-        projectId: requireProjectId(projectId, "useProjectPromptHistory"),
-        signal,
-      }),
+      sdk.projects
+        .promptHistory({
+          projectId: requireProjectId(projectId, "useProjectPromptHistory"),
+          signal,
+        })
+        .then(hydratePromptHistory),
     enabled,
     staleTime: PROMPT_HISTORY_STALE_TIME_MS,
   });

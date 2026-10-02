@@ -9,7 +9,7 @@ import {
   type QueuedThreadMessageRow,
 } from "@bb/db";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   QueuedMessagePayload,
   QueuedMessageSystemNotice,
   QueuedMessageWaitingOn,
@@ -62,7 +62,7 @@ export interface SettleQueueRowArgs {
 
 /** The message a queued row will carry, as the queueing site supplies it. */
 export interface QueuedDispatchMessage {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   execution: ResolvedThreadExecutionOptions;
   senderThreadId: string | null;
   /**

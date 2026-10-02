@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   turnStartParamsSchema,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@get-bb/plugin-sdk/provider-bridge";
 import { expect, it } from "vitest";
 import { extractPiPromptInput } from "./turn-input.js";
@@ -29,7 +29,7 @@ function selectedSkillMention(
   };
 }
 
-function extractText(input: PromptInput[]): string | undefined {
+function extractText(input: RuntimePromptInput[]): string | undefined {
   return extractPiPromptInput(input)?.text;
 }
 

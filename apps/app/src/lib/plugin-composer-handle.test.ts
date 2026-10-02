@@ -406,7 +406,10 @@ describe("composer handle", () => {
 
     expect(binding.handle).toBe(handle);
     expect(handle.text).toBe("two");
-    handle.replace((current) => ({ ...current, text: "updated" }));
+    handle.replace((current) => ({
+      mentions: current.mentions,
+      text: "updated",
+    }));
     expect(second.current().text).toBe("updated");
     expect(first.current().text).toBe("one");
   });
@@ -415,10 +418,23 @@ describe("composer handle", () => {
 describe.each(["core", "plugin"] as const)(
   "%s composer draft actions",
   (caller) => {
-    const actionsFor = (source: ComposerSource) =>
-      caller === "core"
-        ? createCoreComposerActions(source)
-        : makeHandle(source).handle;
+    const actionsFor = (source: ComposerSource) => {
+      const actions =
+        caller === "core"
+          ? createCoreComposerActions(source)
+          : makeHandle(source).handle;
+      return {
+        get draft() {
+          return actions.draft;
+        },
+        focus: () => actions.focus(),
+        replace: (
+          next: Parameters<
+            ReturnType<typeof createCoreComposerActions>["replace"]
+          >[0],
+        ) => Reflect.apply(actions.replace, actions, [next]),
+      };
+    };
     const quote = (
       actions: ReturnType<typeof actionsFor>,
       text: string,

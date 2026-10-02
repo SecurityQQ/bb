@@ -8,7 +8,7 @@ import type {
   PermissionMode,
   PendingInteraction,
   Project,
-  PromptInput,
+  RuntimePromptInput,
   ProviderErrorInfo,
   ProviderNativeRootInput,
   ProviderNativeRootsInputLike,
@@ -579,7 +579,7 @@ export interface PluginDispatchExecutionSources {
  * actually wants to match on.
  */
 export interface PluginDispatchInput {
-  blocks: readonly PromptInput[];
+  blocks: readonly RuntimePromptInput[];
   text: string;
 }
 

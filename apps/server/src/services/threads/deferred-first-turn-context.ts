@@ -4,26 +4,28 @@ import {
   getThread,
 } from "@bb/db";
 import type { DbQueryConnection } from "@bb/db";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import { ApiError } from "../../errors.js";
 import { parseStoredTurnRequestEvent } from "./thread-events.js";
 
 export interface DeferredFirstTurnContext {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   requestSequence: number;
 }
 
 export interface PromptWithGroups {
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
 }
 
 export interface GroupedPrompt {
-  input: PromptInput[];
-  inputGroups: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups: RuntimePromptInput[][];
 }
 
-export function getLeadingAgentOnlyInput(input: PromptInput[]): PromptInput[] {
+export function getLeadingAgentOnlyInput(
+  input: RuntimePromptInput[],
+): RuntimePromptInput[] {
   const visibleInputIndex = input.findIndex(
     (item) => item.visibility !== "agent-only",
   );

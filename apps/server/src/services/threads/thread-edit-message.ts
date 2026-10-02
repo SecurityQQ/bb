@@ -16,12 +16,12 @@ import {
 } from "@bb/db";
 import {
   threadScope,
-  type PromptInput,
+  type RuntimePromptInput,
   type Thread,
   type ThreadEvent,
 } from "@bb/domain";
 import type {
-  EditMessageRequest,
+  RuntimeEditMessageRequest,
   EditMessageResponse,
 } from "@bb/server-contract";
 import type {
@@ -61,7 +61,7 @@ type ThreadRewindPrepareCommand = Extract<
 >;
 
 interface EditableTurn {
-  leadingAgentOnlyInput: PromptInput[];
+  leadingAgentOnlyInput: RuntimePromptInput[];
   currentTurnId: string;
   oldMaxSequence: number;
   precedingProviderCheckpoint: string | null;
@@ -80,7 +80,7 @@ function conflict(message: string): never {
   throw new ApiError(409, "invalid_request", message);
 }
 
-function requestFingerprint(payload: EditMessageRequest): string {
+function requestFingerprint(payload: RuntimeEditMessageRequest): string {
   return createHash("sha256")
     .update(
       JSON.stringify({
@@ -424,7 +424,7 @@ export async function editThreadMessage(
   deps: LoggedPendingInteractionWorkSessionDeps,
   args: {
     environment: Parameters<typeof requireReadyThreadEnvironment>[0];
-    payload: EditMessageRequest;
+    payload: RuntimeEditMessageRequest;
     thread: Thread;
   },
 ): Promise<EditMessageResponse> {

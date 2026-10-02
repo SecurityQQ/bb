@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import {
   mimeTypeFromExtension,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@get-bb/plugin-sdk/provider-bridge";
 import type { ImageContent } from "@earendil-works/pi-ai";
 
@@ -18,7 +18,7 @@ interface SelectedPiSkill {
 }
 
 export function extractPiPromptInput(
-  input: PromptInput[],
+  input: RuntimePromptInput[],
 ): ExtractedPiPromptInput | null {
   const chunks: string[] = [];
   const images: ImageContent[] = [];

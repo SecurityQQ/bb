@@ -9,7 +9,7 @@ import {
   parseStoredThreadEvent,
   threadScope,
   turnScope,
-  type PromptInput,
+  type RuntimePromptInput,
   type ThreadEventType,
 } from "@bb/domain";
 import { noopNotifier } from "../../src/notifier.js";
@@ -133,7 +133,7 @@ function createTurnEventFields(args: CreateTurnEventFieldsArgs) {
   };
 }
 
-function textInput(text: string): PromptInput[] {
+function textInput(text: string): RuntimePromptInput[] {
   return [{ type: "text", text, mentions: [] }];
 }
 

@@ -1,4 +1,4 @@
-import { type PromptInput } from "@bb/domain";
+import { type RuntimePromptInput } from "@bb/domain";
 import { displayWidth, truncateToWidth } from "@bb/text-utils";
 import { fileNameFromPath } from "@bb/thread-view";
 import { promptInputToDraft, type PromptDraftState } from "./prompt-draft.js";
@@ -11,8 +11,8 @@ interface FormatQueuedMessagePreviewOptions {
 }
 
 function visibleQueuedMessageInput(
-  input: readonly PromptInput[],
-): PromptInput[] {
+  input: readonly RuntimePromptInput[],
+): RuntimePromptInput[] {
   return input.filter((chunk) => chunk.visibility !== "agent-only");
 }
 
@@ -23,7 +23,7 @@ function getAttachmentNameFromPath(path: string): string {
 }
 
 export function countQueuedMessageAttachments(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): number {
   let count = 0;
   for (const chunk of visibleQueuedMessageInput(input)) {
@@ -34,10 +34,12 @@ export function countQueuedMessageAttachments(
   return count;
 }
 
-function getQueuedMessageVisibleText(input: readonly PromptInput[]): string {
+function getQueuedMessageVisibleText(
+  input: readonly RuntimePromptInput[],
+): string {
   return visibleQueuedMessageInput(input)
     .filter(
-      (chunk): chunk is Extract<PromptInput, { type: "text" }> =>
+      (chunk): chunk is Extract<RuntimePromptInput, { type: "text" }> =>
         chunk.type === "text",
     )
     .map((chunk) => chunk.text.trim())
@@ -46,7 +48,7 @@ function getQueuedMessageVisibleText(input: readonly PromptInput[]): string {
 }
 
 export function formatQueuedMessagePreview(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
   options: FormatQueuedMessagePreviewOptions = {},
 ): string {
   const visibleInput = visibleQueuedMessageInput(input);
@@ -88,7 +90,7 @@ export function formatQueuedMessagePreview(
 }
 
 export function queuedInputToDraft(
-  input: readonly PromptInput[],
+  input: readonly RuntimePromptInput[],
 ): PromptDraftState {
   return promptInputToDraft(visibleQueuedMessageInput(input));
 }

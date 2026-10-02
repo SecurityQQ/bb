@@ -1,9 +1,9 @@
 import { z } from "zod";
+import type { ComposerDraftSnapshot } from "../app-contract.js";
 import type {
-  ComposerDraftSnapshot,
-  PluginComposerApi,
-} from "../app-contract.js";
-import type { ComposerHandleTarget } from "./composer-handle.js";
+  ComposerHandleTarget,
+  RuntimeComposerDraftReplacement,
+} from "./composer-handle.js";
 
 const range = {
   from: z.number().int().nonnegative(),
@@ -51,6 +51,9 @@ const attachmentsSchema = z.array(
   z.object({
     type: z.enum(["localImage", "localFile"]),
     path: z.string().min(1),
+    experimental_attachmentId: z.string().min(1).optional(),
+    experimental_hostId: z.string().min(1).optional(),
+    experimental_unavailableReason: z.string().optional(),
     experimental_sourceProjectId: z.string().min(1).optional(),
     name: z.string(),
     mimeType: z.string().optional(),
@@ -86,9 +89,7 @@ type DraftTarget = Pick<
   "getDraft" | "setDraft" | "isAvailable" | "focus"
 >;
 
-export function createComposerDraftActions(
-  target: () => DraftTarget,
-): Pick<PluginComposerApi, "draft" | "replace" | "focus"> {
+export function createComposerDraftActions(target: () => DraftTarget) {
   let cached: {
     content: ComposerDraftSnapshot;
     snapshot: ComposerDraftSnapshot;
@@ -118,7 +119,11 @@ export function createComposerDraftActions(
     get draft() {
       return snapshotOf(target());
     },
-    replace(next) {
+    replace(
+      next:
+        | RuntimeComposerDraftReplacement
+        | ((current: ComposerDraftSnapshot) => RuntimeComposerDraftReplacement),
+    ) {
       const current = target();
       requireAvailable(current);
       const snapshot = snapshotOf(current);

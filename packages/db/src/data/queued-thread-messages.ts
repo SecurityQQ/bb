@@ -25,7 +25,7 @@ import {
 } from "@bb/domain";
 import type {
   PermissionMode,
-  PromptInput,
+  RuntimePromptInput,
   QueuedMessagePayload,
   QueuedMessageSystemNotice,
   StartedOnBehalfOf,
@@ -55,7 +55,7 @@ import { queryInSqliteVariableBatches } from "./sqlite-variable-batches.js";
 
 export interface CreateQueuedThreadMessageInput {
   threadId: string;
-  content: PromptInput[];
+  content: RuntimePromptInput[];
   senderThreadId?: string | null;
   /**
    * How the dispatch this row is queued from was requested, and the plugin
@@ -88,7 +88,7 @@ export interface CreateQueuedThreadMessageInput {
 }
 
 export interface UpdateQueuedThreadMessageInput {
-  content: PromptInput[];
+  content: RuntimePromptInput[];
   expectedUpdatedAt: number;
   id: string;
   threadId: string;

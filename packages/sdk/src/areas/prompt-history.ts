@@ -1,14 +1,16 @@
+import { referencePromptHistoryListResponseSchema } from "@bb/server-contract";
 import type {
   PromptHistoryListQuery,
-  PromptHistoryListResponse,
+  ReferencePromptHistoryListResponse,
 } from "@bb/server-contract";
-import { signalRequestArgs, type CreateSdkAreaArgs } from "./common.js";
+import { type CreateSdkAreaArgs } from "./common.js";
 
 export type ExperimentalPromptHistoryListArgs = PromptHistoryListQuery & {
   signal?: AbortSignal;
 };
 
-export type ExperimentalPromptHistoryListResult = PromptHistoryListResponse;
+export type ExperimentalPromptHistoryListResult =
+  ReferencePromptHistoryListResponse;
 
 export interface ExperimentalPromptHistoryArea {
   list(
@@ -22,12 +24,16 @@ export function createPromptHistoryArea({
   return {
     async list(input = {}) {
       const { signal, ...query } = input;
-      return transport.readJson(
-        transport.api.v1["prompt-history"].$get(
-          { query },
-          ...signalRequestArgs(signal),
-        ),
-      );
+      return transport
+        .readJson(
+          transport.api.v1["prompt-history"].$get(
+            { query },
+            { headers: { "x-bb-prompt-references": "1" }, init: { signal } },
+          ),
+        )
+        .then((result) =>
+          referencePromptHistoryListResponseSchema.parse(result),
+        );
     },
   };
 }

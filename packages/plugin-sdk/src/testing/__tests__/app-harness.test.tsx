@@ -2078,6 +2078,7 @@ it("reacts to attachment-only updates and atomic replacement through the public 
   const attachment = {
     type: "localFile",
     path: "attachments/spec.txt",
+    experimental_attachmentId: "attachment-spec",
     name: "spec.txt",
     sizeBytes: 12,
   } as const;
@@ -2092,11 +2093,11 @@ it("reacts to attachment-only updates and atomic replacement through the public 
           onClick={() =>
             composer.replace((current) => ({
               ...current,
-              attachments: current.attachments.some(
+              ...(current.attachments.some(
                 (item) => item.path === attachment.path,
               )
-                ? current.attachments
-                : [...current.attachments, attachment],
+                ? { attachments: undefined }
+                : { attachments: [attachment] }),
             }))
           }
         >

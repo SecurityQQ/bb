@@ -1,7 +1,7 @@
 import { getEnvironment, getThread } from "@bb/db";
 import type { EnvironmentRow } from "@bb/db";
-import type { PromptInput, Thread } from "@bb/domain";
-import type { ForkThreadRequest } from "@bb/server-contract";
+import type { RuntimePromptInput, Thread } from "@bb/domain";
+import type { RuntimeForkThreadRequest } from "@bb/server-contract";
 import type { LoggedPendingInteractionWorkSessionDeps } from "../../types.js";
 import { ApiError } from "../../errors.js";
 import { resolveExistingThreadPermissionMode } from "./thread-execution-plan.js";
@@ -61,7 +61,7 @@ function requireSourceEnvironment(
 
 export async function createThreadForkFromRequest(
   deps: ThreadForkDeps,
-  request: ForkThreadRequest,
+  request: RuntimeForkThreadRequest,
 ) {
   const sourceThread = requireForkSourceThread(deps, request.sourceThreadId);
   requireForkCapableProvider(deps, sourceThread);
@@ -69,7 +69,7 @@ export async function createThreadForkFromRequest(
   const sourceExecution = getLastExecutionOptions(deps, sourceThread.id);
   const visibleInput = request.input ?? [];
   const agentContextSeed = request.agentContextSeed ?? [];
-  const input: PromptInput[] = [...agentContextSeed, ...visibleInput];
+  const input: RuntimePromptInput[] = [...agentContextSeed, ...visibleInput];
   const isSeedOnlyIdleFork =
     visibleInput.length === 0 && agentContextSeed.length > 0;
 

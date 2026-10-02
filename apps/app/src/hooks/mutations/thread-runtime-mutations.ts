@@ -1,12 +1,16 @@
+import {
+  createPromptReferences,
+  threadPromptReferences,
+} from "@/lib/prompt-references";
 import { notifyComposerSubmitted } from "@/lib/composer-submissions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ThreadQueuedMessage } from "@bb/domain";
 import type {
-  CreateQueuedMessageRequest,
+  RuntimeCreateQueuedMessageRequest,
   SendQueuedMessageMode,
   SendQueuedMessageResponse,
   ThreadQueuedMessageListResponse,
-  UpdateQueuedMessageRequest,
+  RuntimeUpdateQueuedMessageRequest,
 } from "@bb/server-contract";
 import type { AppCreateThreadRequest } from "@bb/client-core";
 import { BbHttpError, sdk } from "@/lib/sdk";
@@ -55,11 +59,11 @@ import {
   invalidateThreadHistoryRewriteQueries,
 } from "../cache-owners/mutation-cache-effects";
 
-interface CreateThreadQueuedMessageMutationRequest extends CreateQueuedMessageRequest {
+interface CreateThreadQueuedMessageMutationRequest extends RuntimeCreateQueuedMessageRequest {
   id: string;
 }
 
-interface UpdateThreadQueuedMessageMutationRequest extends UpdateQueuedMessageRequest {
+interface UpdateThreadQueuedMessageMutationRequest extends RuntimeUpdateQueuedMessageRequest {
   id: string;
   queuedMessageId: string;
 }
@@ -129,9 +133,10 @@ export function useCreateThread() {
       errorMessage: "Failed to create thread.",
       lifecycleOperation: "create_thread",
     },
-    mutationFn: (request: AppCreateThreadRequest) =>
+    mutationFn: async (request: AppCreateThreadRequest) =>
       sdk.threads.spawn({
         ...request,
+        input: await createPromptReferences(request),
         origin: "app",
         originKind: request.originKind ?? null,
         startedOnBehalfOf: request.startedOnBehalfOf ?? null,
@@ -186,7 +191,7 @@ export function useSendThreadMessage() {
     }: SendThreadMessageMutationRequest) => {
       return await sdk.threads.send({
         threadId: id,
-        input,
+        input: await threadPromptReferences(input, id),
         model,
         serviceTier,
         reasoningLevel,
@@ -231,8 +236,12 @@ export function useEditThreadMessage() {
       lifecycleOperation: "edit_message",
       showErrorToast: false,
     },
-    mutationFn: ({ id, ...request }: EditMessageMutationRequest) =>
-      sdk.threads.editMessage({ threadId: id, ...request }),
+    mutationFn: async ({ id, ...request }: EditMessageMutationRequest) =>
+      sdk.threads.editMessage({
+        threadId: id,
+        ...request,
+        input: await threadPromptReferences(request.input, id),
+      }),
     onSuccess: (_result, variables) => {
       if (wsManager.getConnectionState() === "connected") {
         return;
@@ -254,7 +263,7 @@ export function useCreateThreadQueuedMessage() {
       lifecycleOperation: "queue_message",
       showErrorToast: false,
     },
-    mutationFn: ({
+    mutationFn: async ({
       id,
       input,
       model,
@@ -266,7 +275,7 @@ export function useCreateThreadQueuedMessage() {
     }: CreateThreadQueuedMessageMutationRequest): Promise<ThreadQueuedMessage> =>
       sdk.threads.queuedMessages.create({
         threadId: id,
-        input,
+        input: await threadPromptReferences(input, id),
         model,
         serviceTier,
         reasoningLevel,
@@ -307,7 +316,7 @@ export function useUpdateThreadQueuedMessage() {
       lifecycleOperation: "update_queued_message",
       showErrorToast: false,
     },
-    mutationFn: ({
+    mutationFn: async ({
       expectedUpdatedAt,
       id,
       input,
@@ -315,7 +324,7 @@ export function useUpdateThreadQueuedMessage() {
     }: UpdateThreadQueuedMessageMutationRequest): Promise<ThreadQueuedMessage> =>
       sdk.threads.queuedMessages.update({
         expectedUpdatedAt,
-        input,
+        input: await threadPromptReferences(input, id),
         queuedMessageId,
         threadId: id,
       }),

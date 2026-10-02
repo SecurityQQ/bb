@@ -1954,7 +1954,9 @@ export function renderSlot<
   let composerMentions: ComposerMention[] = [
     ...(options.composer?.mentions ?? []),
   ];
-  let composerAttachments = [...(options.composer?.attachments ?? [])];
+  let composerAttachments: ComposerDraftSnapshot["attachments"][number][] = [
+    ...(options.composer?.attachments ?? []),
+  ];
   let composerAttachmentCount =
     options.composer?.attachmentCount ?? composerAttachments.length;
   const composerLayout = options.composer?.layout ?? "expanded";

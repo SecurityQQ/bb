@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { createScriptedEchoRuntime } from "@bb/agent-runtime/test";
 import { getThread, listEvents } from "@bb/db";
-import type { PromptInput, ThreadEvent } from "@bb/domain";
+import type { RuntimePromptInput, ThreadEvent } from "@bb/domain";
 import { groupHostDaemonEvents } from "@bb/host-daemon-contract";
 import { describe, expect, it, vi } from "vitest";
 import { appendClientTurnEvent } from "../../src/services/threads/thread-events.js";
@@ -121,7 +121,9 @@ describe("checkpoint identity through runtime, ingestion, and editing", () => {
           await ingest();
           const requests: number[] = [];
           for (const text of ["first", "second"]) {
-            const input: PromptInput[] = [{ type: "text", text, mentions: [] }];
+            const input: RuntimePromptInput[] = [
+              { type: "text", text, mentions: [] },
+            ];
             const request = appendClientTurnEvent(harness.deps, {
               type: "client/turn/requested",
               threadId: source.id,

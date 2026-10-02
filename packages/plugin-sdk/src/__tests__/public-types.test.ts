@@ -1,3 +1,4 @@
+import type { ComposerAttachment } from "../app-contract.js";
 import { readFile } from "node:fs/promises";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
@@ -403,4 +404,24 @@ it("requires provider presentation fields in author-facing declarations", () => 
     description: string;
     icon: string;
   }>();
+});
+
+it("requires a server attachment ID or host ID when constructing composer attachments", () => {
+  expectTypeOf<{
+    type: "localFile";
+    path: string;
+    name: string;
+  }>().not.toMatchTypeOf<ComposerAttachment>();
+  expectTypeOf<{
+    type: "localFile";
+    path: string;
+    name: string;
+    experimental_attachmentId: string;
+  }>().toMatchTypeOf<ComposerAttachment>();
+  expectTypeOf<{
+    type: "localImage";
+    path: string;
+    name: string;
+    experimental_hostId: string;
+  }>().toMatchTypeOf<ComposerAttachment>();
 });

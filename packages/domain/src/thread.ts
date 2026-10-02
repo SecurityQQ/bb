@@ -8,7 +8,7 @@ import {
   queuedMessageWaitingOnSchema,
 } from "./queued-message.js";
 import {
-  promptInputSchema,
+  runtimePromptInputSchema,
   permissionModeSchema,
   reasoningLevelSchema,
   serviceTierSchema,
@@ -348,7 +348,7 @@ export const threadQueuedMessageSchema = z.object({
    * both hand out rows with no surrounding thread to read it from.
    */
   threadId: z.string(),
-  content: z.array(promptInputSchema).min(1),
+  content: z.array(runtimePromptInputSchema).min(1),
   model: z.string().min(1),
   reasoningLevel: reasoningLevelSchema,
   permissionMode: permissionModeSchema,

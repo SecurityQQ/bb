@@ -11,7 +11,10 @@ import {
   pendingInteractionResolutionSchema,
   pendingInteractionSchema,
   permissionModeInputSchema,
+  runtimePromptInputSchema,
   promptInputSchema,
+  type PromptInput,
+  type RuntimePromptInput,
   clientTurnRequestIdSchema,
   queuedMessageWaitHolderSchema,
   queuedMessageWaitingOnSchema,
@@ -50,6 +53,12 @@ import {
   workspaceFileListResponseSchema,
   workspacePathListResponseSchema,
 } from "./shared.js";
+
+export const incomingPromptInputSchema = z.union([
+  promptInputSchema,
+  runtimePromptInputSchema,
+]);
+export type IncomingPromptInput = z.infer<typeof incomingPromptInputSchema>;
 
 export const sendMessageModeSchema = z.enum([
   "queue-if-active",
@@ -97,7 +106,7 @@ export const createThreadRequestSchema = z
     lifecycleOwnerThreadId: z.string().min(1).optional(),
     visibility: threadVisibilitySchema.optional(),
     title: z.string().min(1).optional(),
-    input: z.array(promptInputSchema),
+    input: z.array(incomingPromptInputSchema),
     model: z.string().min(1).optional(),
     serviceTier: serviceTierSchema.optional(),
     reasoningLevel: reasoningLevelSchema.optional(),
@@ -172,9 +181,18 @@ export const createThreadRequestSchema = z
       });
     }
   });
-export type CreateThreadRequest = z.infer<typeof createThreadRequestSchema>;
+export type IncomingCreateThreadRequest = z.infer<
+  typeof createThreadRequestSchema
+>;
+export type CreateThreadRequest = Omit<IncomingCreateThreadRequest, "input"> & {
+  input: PromptInput[];
+};
+export type RuntimeCreateThreadRequest = Omit<
+  IncomingCreateThreadRequest,
+  "input"
+> & { input: RuntimePromptInput[] };
 
-const agentOnlyPromptInputSchema = promptInputSchema.and(
+const agentOnlyPromptInputSchema = incomingPromptInputSchema.and(
   z.object({ visibility: z.literal("agent-only") }),
 );
 
@@ -182,7 +200,7 @@ export const forkThreadRequestSchema = z
   .object({
     sourceThreadId: z.string().min(1),
     sourceSeqEnd: z.number().int().nonnegative().optional(),
-    input: z.array(promptInputSchema).min(1).optional(),
+    input: z.array(incomingPromptInputSchema).min(1).optional(),
     agentContextSeed: z.array(agentOnlyPromptInputSchema).min(1).optional(),
     title: z.string().min(1).optional(),
     permissionMode: permissionModeInputSchema.optional(),
@@ -229,10 +247,21 @@ export const forkThreadRequestSchema = z
       });
     }
   });
-export type ForkThreadRequest = z.infer<typeof forkThreadRequestSchema>;
+export type IncomingForkThreadRequest = z.infer<typeof forkThreadRequestSchema>;
+export type ForkThreadRequest = Omit<
+  IncomingForkThreadRequest,
+  "input" | "agentContextSeed"
+> & {
+  input?: PromptInput[];
+  agentContextSeed?: (PromptInput & { visibility: "agent-only" })[];
+};
+export type RuntimeForkThreadRequest = Omit<
+  IncomingForkThreadRequest,
+  "input" | "agentContextSeed"
+> & { input?: RuntimePromptInput[]; agentContextSeed?: RuntimePromptInput[] };
 
 const sendMessageRequestFieldsSchema = z.object({
-  input: z.array(promptInputSchema).min(1),
+  input: z.array(incomingPromptInputSchema).min(1),
   model: z.string().optional(),
   serviceTier: serviceTierSchema.optional(),
   reasoningLevel: reasoningLevelSchema.optional(),
@@ -252,7 +281,16 @@ const sendMessageRequestFieldsSchema = z.object({
 });
 
 export const sendMessageRequestSchema = sendMessageRequestFieldsSchema;
-export type SendMessageRequest = z.infer<typeof sendMessageRequestSchema>;
+export type IncomingSendMessageRequest = z.infer<
+  typeof sendMessageRequestSchema
+>;
+export type SendMessageRequest = Omit<IncomingSendMessageRequest, "input"> & {
+  input: PromptInput[];
+};
+export type RuntimeSendMessageRequest = Omit<
+  IncomingSendMessageRequest,
+  "input"
+> & { input: RuntimePromptInput[] };
 
 /**
  * How a `send` request was taken.
@@ -290,7 +328,16 @@ export const editMessageRequestSchema = sendMessageRequestFieldsSchema
     expectedRequestSequence: z.number().int().nonnegative().optional(),
   })
   .strict();
-export type EditMessageRequest = z.infer<typeof editMessageRequestSchema>;
+export type IncomingEditMessageRequest = z.infer<
+  typeof editMessageRequestSchema
+>;
+export type EditMessageRequest = Omit<IncomingEditMessageRequest, "input"> & {
+  input: PromptInput[];
+};
+export type RuntimeEditMessageRequest = Omit<
+  IncomingEditMessageRequest,
+  "input"
+> & { input: RuntimePromptInput[] };
 
 export const editMessageResponseSchema = z
   .object({
@@ -362,7 +409,7 @@ export const sendQueuedMessageModeSchema = z.enum(["auto", "steer"]);
 export type SendQueuedMessageMode = z.infer<typeof sendQueuedMessageModeSchema>;
 
 export const createQueuedMessageRequestSchema = z.object({
-  input: z.array(promptInputSchema).min(1),
+  input: z.array(incomingPromptInputSchema).min(1),
   model: z.string().optional(),
   serviceTier: serviceTierSchema.optional(),
   reasoningLevel: reasoningLevelSchema.optional(),
@@ -370,17 +417,33 @@ export const createQueuedMessageRequestSchema = z.object({
   executionInputSources: existingThreadExecutionInputSourcesSchema.optional(),
   senderThreadId: z.string().min(1).optional(),
 });
-export type CreateQueuedMessageRequest = z.infer<
+export type IncomingCreateQueuedMessageRequest = z.infer<
   typeof createQueuedMessageRequestSchema
 >;
+export type CreateQueuedMessageRequest = Omit<
+  IncomingCreateQueuedMessageRequest,
+  "input"
+> & { input: PromptInput[] };
+export type RuntimeCreateQueuedMessageRequest = Omit<
+  IncomingCreateQueuedMessageRequest,
+  "input"
+> & { input: RuntimePromptInput[] };
 
 export const updateQueuedMessageRequestSchema = z.object({
   expectedUpdatedAt: z.number().int().nonnegative(),
-  input: z.array(promptInputSchema).min(1),
+  input: z.array(incomingPromptInputSchema).min(1),
 });
-export type UpdateQueuedMessageRequest = z.infer<
+export type IncomingUpdateQueuedMessageRequest = z.infer<
   typeof updateQueuedMessageRequestSchema
 >;
+export type UpdateQueuedMessageRequest = Omit<
+  IncomingUpdateQueuedMessageRequest,
+  "input"
+> & { input: PromptInput[] };
+export type RuntimeUpdateQueuedMessageRequest = Omit<
+  IncomingUpdateQueuedMessageRequest,
+  "input"
+> & { input: RuntimePromptInput[] };
 
 export const sendQueuedMessageRequestSchema = z.object({
   mode: sendQueuedMessageModeSchema,

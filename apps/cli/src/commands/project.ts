@@ -249,6 +249,21 @@ export function registerProjectCommands(
     .description("Upload and download server-managed project attachments");
 
   attachment
+    .command("show <attachmentId>")
+    .description("Show an uploaded attachment by ID")
+    .option("--json", "Output as JSON")
+    .action(
+      action(async (attachmentId: string) => {
+        outputJson(
+          { json: true },
+          await createCliBbSdk(getUrl()).projects.attachments.experimental_get({
+            attachmentId,
+          }),
+        );
+      }),
+    );
+
+  attachment
     .command("upload <id>")
     .description("Upload a file read from this CLI machine")
     .requiredOption(

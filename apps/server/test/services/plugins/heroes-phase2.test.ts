@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { encodeClientTurnRequestIdNumber } from "@bb/domain";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import {
   buildExecutionOptions,
   buildThreadStartCommand,
@@ -208,7 +208,7 @@ describe("hero plugin: agent-enrichment (Phase 2 surfaces)", () => {
     ]);
 
     const { environment, thread } = seedThreadFixture(3);
-    const input: PromptInput[] = [
+    const input: RuntimePromptInput[] = [
       {
         type: "text",
         text: "Follow @Repo conventions please",

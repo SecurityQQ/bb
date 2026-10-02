@@ -24,9 +24,10 @@ describe("bb prompt-history command output", () => {
       register,
     );
 
-    expect(list).toHaveBeenCalledWith({
-      query: { cursor: "next", limit: "25" },
-    });
+    expect(list).toHaveBeenCalledWith(
+      { query: { cursor: "next", limit: "25" } },
+      expect.objectContaining({ headers: { "x-bb-prompt-references": "1" } }),
+    );
     expect(console.log).toHaveBeenCalledWith(JSON.stringify(response, null, 2));
   });
 
@@ -39,7 +40,7 @@ describe("bb prompt-history command output", () => {
             createdAt: Date.UTC(2026, 9, 1, 12),
             input: [
               { type: "text", text: "Fix the\nlogin flow", mentions: [] },
-              { type: "localFile", path: "/tmp/spec.md", name: "spec.md" },
+              { type: "localFile", hostId: "host-1", path: "/tmp/spec.md" },
             ],
             projectId: "proj_1",
             threadId: "thr_1",
@@ -53,7 +54,7 @@ describe("bb prompt-history command output", () => {
 
     const output = collectLogLines(vi.mocked(console.log)).join("\n");
     expect(output).toContain(
-      "2026-10-01T12:00:00.000Z  thr_1   Fix the login flow [file spec.md]",
+      "2026-10-01T12:00:00.000Z  thr_1   Fix the login flow [file /tmp/spec.md]",
     );
     expect(output).toContain(
       "Next page: bb prompt-history list --cursor abc --limit 1",

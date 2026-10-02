@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { promptHistoryListEntrySchema } from "@bb/domain";
+import {
+  referencePromptHistoryListEntrySchema,
+  promptHistoryListEntrySchema,
+} from "@bb/domain";
 
 export const promptHistoryListQuerySchema = z.object({
   cursor: z.string().min(1).optional(),
@@ -15,4 +18,12 @@ export const promptHistoryListResponseSchema = z.object({
 });
 export type PromptHistoryListResponse = z.infer<
   typeof promptHistoryListResponseSchema
+>;
+
+export const referencePromptHistoryListResponseSchema = z.object({
+  entries: z.array(referencePromptHistoryListEntrySchema),
+  nextCursor: z.string().nullable(),
+});
+export type ReferencePromptHistoryListResponse = z.infer<
+  typeof referencePromptHistoryListResponseSchema
 >;

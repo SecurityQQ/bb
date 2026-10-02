@@ -149,7 +149,16 @@ export function composerDraftFromPromptDraft(
   const cached = composerDrafts.get(draft);
   if (cached !== undefined) return cached;
   const next: ComposerDraftSnapshot = {
-    attachments: draft.attachments,
+    attachments: draft.attachments.map(
+      ({ id, hostId, unavailableReason, ...attachment }) => ({
+        ...attachment,
+        ...(id ? { experimental_attachmentId: id } : {}),
+        ...(hostId ? { experimental_hostId: hostId } : {}),
+        ...(unavailableReason
+          ? { experimental_unavailableReason: unavailableReason }
+          : {}),
+      }),
+    ),
     text: draft.text,
     mentions: draft.mentions.map(composerMentionFromTextMention),
   };
@@ -179,7 +188,11 @@ export function createCoreComposerActions(source: ComposerDraftSource) {
 function composerDraftTarget(source: ComposerDraftSource) {
   return {
     getDraft: () => composerDraftFromPromptDraft(source.getCurrent()),
-    setDraft: (next: ComposerDraftReplacement) => {
+    setDraft: (
+      next: Omit<ComposerDraftReplacement, "attachments"> & {
+        attachments?: ComposerDraftSnapshot["attachments"];
+      },
+    ) => {
       const current = source.getCurrent();
       source.setDraft({
         ...current,
@@ -187,9 +200,27 @@ function composerDraftTarget(source: ComposerDraftSource) {
         mentions: next.mentions.map(textMentionFromComposerMention),
         attachments:
           next.attachments === undefined ||
-          next.attachments === current.attachments
+          next.attachments === composerDraftFromPromptDraft(current).attachments
             ? current.attachments
-            : [...next.attachments],
+            : next.attachments.map(
+                ({
+                  experimental_attachmentId,
+                  experimental_hostId,
+                  experimental_unavailableReason,
+                  ...attachment
+                }) => ({
+                  ...attachment,
+                  ...(experimental_attachmentId
+                    ? { id: experimental_attachmentId }
+                    : {}),
+                  ...(experimental_hostId
+                    ? { hostId: experimental_hostId }
+                    : {}),
+                  ...(experimental_unavailableReason
+                    ? { unavailableReason: experimental_unavailableReason }
+                    : {}),
+                }),
+              ),
       });
     },
     isAvailable: source.isAvailable ?? (() => true),

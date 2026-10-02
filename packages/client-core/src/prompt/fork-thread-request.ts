@@ -1,5 +1,6 @@
 import type {
   PermissionMode,
+  RuntimePromptInput,
   PromptInput,
   ReasoningLevel,
   ServiceTier,
@@ -24,12 +25,15 @@ export interface ForkThreadCreateSeed {
 }
 
 interface BuildForkThreadRequestArgs extends ForkThreadCreateSeed {
-  input: PromptInput[];
+  input: (PromptInput | RuntimePromptInput)[];
   pluginSubmission: AppCreateThreadRequest["pluginSubmission"];
   providerSupportsFork: boolean;
 }
 
-type ForkableThread = Pick<Thread, "archivedAt" | "environmentId" | "providerId">;
+type ForkableThread = Pick<
+  Thread,
+  "archivedAt" | "environmentId" | "providerId"
+>;
 
 export function isThreadForkable(
   sourceThread: ForkableThread | null,

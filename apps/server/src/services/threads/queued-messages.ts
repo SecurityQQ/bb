@@ -21,15 +21,15 @@ import {
   queuedMessageSystemNoticeSchema,
 } from "@bb/domain";
 import type {
-  PromptInput,
+  RuntimePromptInput,
   QueuedMessageWaitingOn,
   Thread,
   ThreadQueuedMessage,
   ThreadTurnInitiator,
 } from "@bb/domain";
 import type {
-  CreateQueuedMessageRequest,
-  SendMessageRequest,
+  RuntimeCreateQueuedMessageRequest,
+  RuntimeSendMessageRequest,
   SendQueuedMessageMode,
 } from "@bb/server-contract";
 import type {
@@ -184,7 +184,7 @@ async function requireReadyQueuedMessageEnvironment(
 }
 
 export interface CreateQueuedMessageForThreadArgs {
-  payload: CreateQueuedMessageRequest;
+  payload: RuntimeCreateQueuedMessageRequest;
   thread: Thread;
 }
 
@@ -299,7 +299,7 @@ function isQueuedMessageAutoSendCandidate(
 }
 
 interface FormatQueuedMessageInputForSenderArgs {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   senderThreadId: string | null;
 }
 
@@ -320,7 +320,7 @@ function sendQueuedMessagePayload(
   queuedMessage: ThreadQueuedMessage,
   mode: SendQueuedMessageMode,
   senderThreadId: string | null,
-): SendMessageRequest {
+): RuntimeSendMessageRequest {
   return {
     input: queuedMessage.content,
     mode,
@@ -334,7 +334,7 @@ function sendQueuedMessagePayload(
 
 function formatQueuedMessageInputForSender(
   args: FormatQueuedMessageInputForSenderArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   if (args.senderThreadId === null) {
     return args.input;
   }

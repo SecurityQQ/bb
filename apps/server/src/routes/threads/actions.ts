@@ -1,3 +1,4 @@
+import { intendedThreadHostId } from "../../services/threads/dispatch-attempt.js";
 import { refreshProviderRetirement } from "../../services/environments/environment-engine.js";
 import {
   deleteQueuedThreadMessage,
@@ -42,7 +43,11 @@ import {
   requirePublicThread,
 } from "../../services/lib/entity-lookup.js";
 import { parseSafeRelativeRoutePath } from "../relative-route-path.js";
-import { resolvePromptAttachmentReferences } from "../../services/projects/attachments.js";
+import {
+  normalizeIncomingPromptInput,
+  resolvePromptHost,
+  resolvePromptAttachmentReferences,
+} from "../../services/projects/attachments.js";
 import {
   createQueuedMessageForThread,
   sendQueuedMessageNow,
@@ -239,7 +244,18 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
   post(routes.send, async (context, payload) => {
     const thread = requirePublicThread(deps.db, context.req.param("id"));
     return context.json(
-      await acceptThreadSendRequest(deps, { payload, thread }),
+      await acceptThreadSendRequest(deps, {
+        payload: {
+          ...payload,
+          input: resolvePromptHost(
+            normalizeIncomingPromptInput(deps.db, payload.input),
+            thread.environmentId
+              ? (getEnvironment(deps.db, thread.environmentId)?.hostId ?? null)
+              : intendedThreadHostId(deps, thread.id),
+          ),
+        },
+        thread,
+      }),
     );
   });
 
@@ -250,7 +266,15 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
     });
     const result = await editThreadMessage(deps, {
       environment,
-      payload,
+      payload: {
+        ...payload,
+        input: resolvePromptHost(
+          normalizeIncomingPromptInput(deps.db, payload.input),
+          thread.environmentId
+            ? (getEnvironment(deps.db, thread.environmentId)?.hostId ?? null)
+            : intendedThreadHostId(deps, thread.id),
+        ),
+      },
       thread,
     });
     return context.json(result);
@@ -266,7 +290,15 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
   post(routes.createQueuedMessage, async (context, payload) => {
     const thread = requirePublicThread(deps.db, context.req.param("id"));
     const queuedMessage = await createQueuedMessageForThread(deps, {
-      payload,
+      payload: {
+        ...payload,
+        input: resolvePromptHost(
+          normalizeIncomingPromptInput(deps.db, payload.input),
+          thread.environmentId
+            ? (getEnvironment(deps.db, thread.environmentId)?.hostId ?? null)
+            : intendedThreadHostId(deps, thread.id),
+        ),
+      },
       thread,
     });
     return context.json(queuedMessage, 201);
@@ -325,7 +357,12 @@ export function registerThreadActionRoutes(app: Hono, deps: AppDeps): void {
     const input = await resolvePromptAttachmentReferences({
       db: deps.db,
       dataDir: deps.config.dataDir,
-      input: payload.input,
+      input: resolvePromptHost(
+        normalizeIncomingPromptInput(deps.db, payload.input),
+        thread.environmentId
+          ? (getEnvironment(deps.db, thread.environmentId)?.hostId ?? null)
+          : intendedThreadHostId(deps, thread.id),
+      ),
       projectId: thread.projectId,
     });
     const result = updateQueuedThreadMessage(deps.db, deps.hub, {

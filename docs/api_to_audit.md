@@ -1717,7 +1717,7 @@ build inlines the SDK's published, self-contained bundle.
    constructors, unhandled-event builders). What still comes from
    `@bb/domain` is deliberate and consumed by bridges today: the
    command-plane and interaction surface the protocol's params are made of
-   (`PromptInput`, `PendingInteraction*`, `DynamicTool`,
+   (`RuntimePromptInput`, `PendingInteraction*`, `DynamicTool`,
    `RuntimePermissionPolicy`, permission/reasoning/service-tier values,
    rate-limit state, workflow snapshots) plus the enum/status types the
    delta shapes reference (`ThreadEventItemStatus`, `ThreadEventTurnStatus`,
@@ -3657,21 +3657,49 @@ complete draft snapshot instead of separate content and attachment getters.
 
 ## Portable prompt attachments
 
-`ComposerAttachment.experimental_sourceProjectId` and the matching local file
-and image prompt-input field identify the project owning an uploaded attachment.
-Uploads and prompt history populate it. Draft replacement, persistence, and input
-conversion preserve it; previews read from the source. Core validates the source
-and copies files to the destination before accepting a create, send, or queued
-message request, then removes the source field from persisted and dispatched
-input. Omission retains destination-relative behavior for existing clients.
-Runtime-readable paths cannot specify a source project. `sizeBytes` is optional
-on `ComposerAttachment`; absence means unknown, and legacy stored zero values are
-read as unknown.
+Public `PromptInput` accepts uploaded `{ type: "attachment", attachmentId }`
+references and host-local `{ type: "localFile" | "localImage", hostId, path }`
+references. Host paths must be absolute. Upload results require `id`; filenames,
+MIME types and exact sizes come from server inventory. `RuntimePromptInput` is
+an execution/storage representation, not a public submission type. Legacy JSON
+is accepted by ingress schemas and normalized before service dispatch; public
+SDK request types do not include legacy alternatives.
 
-Stabilization requires cross-project history restoration coverage for files and
-images, draft persistence and project changes, queued-message editing,
-missing-source errors, and verification that provider input contains only
-destination-local references.
+`projects.attachments.experimental_get({ attachmentId })` returns metadata,
+`experimental_contentUrl({ attachmentId })` addresses uploaded bytes, and
+`experimental_lookup({ projectId, path })` resolves older stored draft paths.
+These methods check the source project's visibility. The CLI exposes metadata
+through `bb project attachment show` and accepts `attachment:<id>` in thread
+`--file` and `--image` options. Existing upload and download commands remain.
+
+SDK history reads send `x-bb-prompt-references: 1` and return ID/host references.
+Without that header, history retains its legacy path representation. Missing
+uploads and old local paths without recorded host provenance appear as
+`unavailableAttachment` history items, which cannot be submitted. Core displays
+those drafts but refuses to send them until the attachment is replaced.
+
+On create, send and queue updates, core copies uploaded bytes into the destination
+project and records the destination attachment ID before accepting the input.
+Source-project deletion cannot remove that destination copy. Project attachment
+inventory, ownership and pruning remain the storage model; shared blob retention
+is not introduced. Host references are bound to the selected execution host;
+cross-host file transfer is not supported. Provider execution continues to use
+staged local paths. The daemon protocol is incremented for provenance fields.
+
+`ComposerAttachment` construction requires `experimental_attachmentId` or
+`experimental_hostId`. Snapshots may still contain unresolved legacy attachments;
+omit `attachments` when editing only text to preserve them. The internal composer
+parser retains old plugin payload support. `experimental_unavailableReason` on a
+snapshot explains why an old reference cannot be restored safely.
+
+Draft persistence and replacement retain attachment identity and host provenance.
+Unknown draft sizes remain absent. Historical zero placeholders are read as
+unknown. Uploaded file sizes are resolved from inventory, not client estimates.
+
+Stabilization requires legacy request/response coverage, compiler rejection of
+implicit public identities, cross-project reuse after source deletion, queued
+editing, host mismatch rejection, unavailable history behavior, and provider
+staging verification.
 
 ## Thread creation placement
 

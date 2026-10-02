@@ -136,7 +136,9 @@ worktree` only; a provider takes its branch through `--environment-inputs`.
   bytes live on the CLI machine, including when the CLI and bb server are on
   different hosts. It reads locally and sends multipart bytes through the
   configured `BB_SERVER_URL` (and its enrolled-machine authentication proxy),
-  returning the stable server attachment DTO. Optional `--filename` and
+  returning the stable server attachment DTO with an `id`. Reuse it with
+  `--file attachment:<id>` or `--image attachment:<id>`, including in another
+  project. `bb project attachment show <attachment-id>` reads its metadata. Optional `--filename` and
   `--mime-type` override inferred metadata. Thread `--file` and `--image` perform this
   upload automatically for absolute paths and `file:` URLs; use the explicit
   command when a reusable attachment token is needed. Image MIME types are

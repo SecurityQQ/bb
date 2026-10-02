@@ -24,7 +24,7 @@ import {
 import type { SQL } from "drizzle-orm";
 import type {
   ClientTurnRequestId,
-  PromptInput,
+  RuntimePromptInput,
   ThreadEvent,
   StoredThreadEventDataForType,
   SystemThreadInterruptedReason,
@@ -595,7 +595,7 @@ function isStoredEventPayload(
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function extractVisiblePromptText(input: readonly PromptInput[]): string {
+function extractVisiblePromptText(input: readonly RuntimePromptInput[]): string {
   return input
     .filter((part) => part.visibility !== "agent-only")
     .flatMap((part) => (part.type === "text" ? [part.text] : []))

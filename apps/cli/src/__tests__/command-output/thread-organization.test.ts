@@ -71,7 +71,9 @@ describe("bb thread organization commands", () => {
       createdAt: 1,
       updatedAt: 1,
     }));
-    stubServerApi({ "v1.threads.:id.queued-messages.$post": create });
+    stubServerApi({
+      "v1.threads.:id.queued-messages.$post": create,
+    });
 
     await runCommand(
       ["thread", "queue", "create", "thread-1", "next task"],
@@ -88,7 +90,15 @@ describe("bb thread organization commands", () => {
 
   it("queues existing attachment tokens with text and a model without uploading", async () => {
     const create = vi.fn(async () => queuedMessage({}));
-    stubServerApi({ "v1.threads.:id.queued-messages.$post": create });
+    stubServerApi({
+      "v1.threads.:id.queued-messages.$post": create,
+      "v1.threads.:id.$get": async () => ({ projectId: "project-1" }),
+      "v1.projects.:id.attachments.lookup.$get": async ({
+        query,
+      }: {
+        query: { path: string };
+      }) => ({ id: `attachment-${query.path}` }),
+    });
 
     await runCommand(
       [
@@ -116,9 +126,9 @@ describe("bb thread organization commands", () => {
         model: "gpt-5",
         input: [
           { type: "text", text: "review both", mentions: [] },
-          { type: "localFile", path: "report.pdf" },
-          { type: "localImage", path: "one.png" },
-          { type: "localImage", path: "two.png" },
+          { type: "attachment", attachmentId: "attachment-report.pdf" },
+          { type: "attachment", attachmentId: "attachment-one.png" },
+          { type: "attachment", attachmentId: "attachment-two.png" },
         ],
       },
     });
@@ -144,6 +154,7 @@ describe("bb thread organization commands", () => {
         vi.mocked(globalThis.fetch).mockResolvedValue(
           new Response(
             JSON.stringify({
+              id: "uploaded-attachment",
               type,
               path: "durable-token",
               name: filename,
@@ -191,8 +202,8 @@ describe("bb thread organization commands", () => {
           json: {
             input: [
               { type: "text", text: "review this", mentions: [] },
-              { type, path: "durable-token" },
-              { type, path: "durable-token" },
+              { type: "attachment", attachmentId: "uploaded-attachment" },
+              { type: "attachment", attachmentId: "uploaded-attachment" },
             ],
           },
         });
@@ -304,6 +315,12 @@ describe("bb thread organization commands", () => {
     stubServerApi({
       "v1.threads.:id.queued-messages.$get": list,
       "v1.threads.:id.queued-messages.:queuedMessageId.$patch": update,
+      "v1.threads.:id.$get": async () => ({ projectId: "project-1" }),
+      "v1.projects.:id.attachments.lookup.$get": async ({
+        query,
+      }: {
+        query: { path: string };
+      }) => ({ id: `attachment-${query.path}` }),
     });
 
     await runCommand(
@@ -333,10 +350,13 @@ describe("bb thread organization commands", () => {
         expectedUpdatedAt: 42,
         input: [
           { type: "text", text: "revised task", mentions: [] },
-          { type: "localFile", path: "uploaded-spec.md" },
-          { type: "localFile", path: "uploaded-data.json" },
-          { type: "localImage", path: "mock-uploaded.png" },
-          { type: "localImage", path: "detail-uploaded.png" },
+          { type: "attachment", attachmentId: "attachment-uploaded-spec.md" },
+          { type: "attachment", attachmentId: "attachment-uploaded-data.json" },
+          { type: "attachment", attachmentId: "attachment-mock-uploaded.png" },
+          {
+            type: "attachment",
+            attachmentId: "attachment-detail-uploaded.png",
+          },
         ],
       },
     });

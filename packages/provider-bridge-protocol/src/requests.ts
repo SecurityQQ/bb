@@ -2,7 +2,7 @@ import {
   clientTurnRequestIdSchema,
   dynamicToolSchema,
   instructionModeSchema,
-  promptInputSchema,
+  runtimePromptInputSchema,
 } from "@bb/domain";
 import { z } from "zod";
 import { bridgeExecutionOptionsSchema } from "./execution-options.js";
@@ -44,7 +44,7 @@ export const modelListParamsSchema = z
 export const threadStartParamsSchema = z
   .object({
     ...sessionConstructionFields,
-    input: z.array(promptInputSchema).optional(),
+    input: z.array(runtimePromptInputSchema).optional(),
   })
   .passthrough();
 
@@ -95,7 +95,7 @@ export const threadNameSetParamsSchema = z
 const turnInputFields = {
   threadId: z.string().min(1),
   providerThreadId: z.string().min(1),
-  input: z.array(promptInputSchema),
+  input: z.array(runtimePromptInputSchema),
   clientRequestId: clientTurnRequestIdSchema,
   options: bridgeExecutionOptionsSchema,
 };

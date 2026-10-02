@@ -6,7 +6,7 @@ import {
 } from "@/hooks/usePromptDraftStorage";
 import { promptDraftToInput } from "@bb/client-core";
 import type { PromptDraftState } from "@bb/client-core";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 
 export interface InlineComposerDraftSession {
   editSessionId: number;
@@ -22,9 +22,9 @@ interface UseActiveComposerDraftArgs {
 interface UseActiveComposerDraftResult {
   promptDraft: ReturnType<typeof usePromptDraftStorage>;
   currentPromptDraft: PromptDraftState;
-  currentPromptDraftInput: PromptInput[];
+  currentPromptDraftInput: RuntimePromptInput[];
   activeComposerDraft: PromptDraftState;
-  activeComposerDraftInput: PromptInput[];
+  activeComposerDraftInput: RuntimePromptInput[];
   handleChangeMessage: (text: string, mentions: PromptTextMention[]) => void;
   removeActiveComposerAttachment: (path: string) => void;
 }

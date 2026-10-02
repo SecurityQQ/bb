@@ -1,3 +1,8 @@
+import { z } from "zod";
+import {
+  referencePromptHistoryEntrySchema,
+  type ReferencePromptHistoryEntry,
+} from "@bb/domain";
 import type {
   MachineEnvironmentReplace,
   MachineEnvironmentSet,
@@ -14,7 +19,6 @@ import type {
   ProjectWithThreadsResponse,
   ProjectListQuery,
   ProjectPathsQuery,
-  PromptHistoryResponse,
   PromptHistoryQuery,
   ReorderProjectRequest,
   SidebarBootstrapResponse,
@@ -177,7 +181,7 @@ export type ProjectListResult =
   | ProjectResponse[]
   | ProjectWithThreadsResponse[];
 export type ProjectPathsResult = WorkspacePathListResponse;
-export type ProjectPromptHistoryResult = PromptHistoryResponse;
+export type ProjectPromptHistoryResult = ReferencePromptHistoryEntry[];
 export type ProjectReorderResult = ProjectResponse[];
 export type ProjectSidebarBootstrapResult = SidebarBootstrapResponse;
 export type ProjectSourceAddResult = ProjectSource;
@@ -192,6 +196,14 @@ export interface ProjectSourcesArea {
 }
 
 export interface ProjectAttachmentsArea {
+  experimental_get(args: {
+    attachmentId: string;
+  }): Promise<ProjectAttachmentUploadResult>;
+  experimental_lookup(args: {
+    projectId: string;
+    path: string;
+  }): Promise<ProjectAttachmentUploadResult>;
+  experimental_contentUrl(args: { attachmentId: string }): string;
   copy(args: ProjectAttachmentCopyArgs): Promise<void>;
   read(args: ProjectAttachmentReadArgs): Promise<ProjectAttachmentReadResult>;
   upload(
@@ -370,6 +382,24 @@ function encodeBase64(bytes: Uint8Array): string {
 export function createProjectsArea(args: CreateSdkAreaArgs): ProjectsArea {
   const { transport } = args;
   const attachments: ProjectAttachmentsArea = {
+    async experimental_get({ attachmentId }) {
+      return transport.readJson(
+        transport.api.v1.attachments[":id"].$get({
+          param: { id: attachmentId },
+        }),
+      );
+    },
+    async experimental_lookup({ projectId, path }) {
+      return transport.readJson(
+        transport.api.v1.projects[":id"].attachments.lookup.$get({
+          param: { id: projectId },
+          query: { path },
+        }),
+      );
+    },
+    experimental_contentUrl({ attachmentId }) {
+      return `${transport.baseUrl}/api/v1/attachments/${encodeURIComponent(attachmentId)}/content`;
+    },
     async copy(input) {
       const { projectId, ...json } = input;
       await transport.readVoid(
@@ -609,15 +639,22 @@ export function createProjectsArea(args: CreateSdkAreaArgs): ProjectsArea {
       );
     },
     async promptHistory(input) {
-      return transport.readJson(
-        transport.api.v1.projects[":id"]["prompt-history"].$get(
-          {
-            param: { id: input.projectId },
-            query: { limit: input.limit },
-          },
-          ...signalRequestArgs(input.signal),
-        ),
-      );
+      return transport
+        .readJson(
+          transport.api.v1.projects[":id"]["prompt-history"].$get(
+            {
+              param: { id: input.projectId },
+              query: { limit: input.limit },
+            },
+            {
+              headers: { "x-bb-prompt-references": "1" },
+              init: { signal: input.signal },
+            },
+          ),
+        )
+        .then((result) =>
+          z.array(referencePromptHistoryEntrySchema).parse(result),
+        );
     },
     async reorder(input) {
       return transport.readJson(

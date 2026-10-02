@@ -643,6 +643,26 @@ export const publicApiRoutes = {
       request: formRequest<PathProjectId, ProjectAttachmentUploadForm>(),
       response: jsonResponse<UploadedPromptAttachment>({ status: 201 }),
     }),
+    lookupAttachment: defineRoute({
+      path: "/projects/:id/attachments/lookup",
+      method: "get",
+      request: queryRequest<PathProjectId, ProjectAttachmentContentQuery>(
+        projectAttachmentContentQuerySchema,
+      ),
+      response: jsonResponse<UploadedPromptAttachment>(),
+    }),
+    getAttachment: defineRoute({
+      path: "/attachments/:id",
+      method: "get",
+      request: noRequest<PathId>(),
+      response: jsonResponse<UploadedPromptAttachment>(),
+    }),
+    attachmentContentById: defineRoute({
+      path: "/attachments/:id/content",
+      method: "get",
+      request: noRequest<PathId>(),
+      response: binaryResponse<Uint8Array>(),
+    }),
     copyAttachments: defineRoute({
       path: "/projects/:id/attachments/copy",
       method: "post",
@@ -1329,17 +1349,21 @@ export const publicApiRoutes = {
     create: defineRoute({
       path: "/threads",
       method: "post",
-      request: jsonRequest<EmptyInput, CreateThreadRequest>(
-        createThreadRequestSchema,
-      ),
+      request: jsonRequest<
+        EmptyInput,
+        CreateThreadRequest,
+        typeof createThreadRequestSchema
+      >(createThreadRequestSchema),
       response: jsonResponse<ThreadResponse>({ status: 201 }),
     }),
     fork: defineRoute({
       path: "/threads/fork",
       method: "post",
-      request: jsonRequest<EmptyInput, ForkThreadRequest>(
-        forkThreadRequestSchema,
-      ),
+      request: jsonRequest<
+        EmptyInput,
+        ForkThreadRequest,
+        typeof forkThreadRequestSchema
+      >(forkThreadRequestSchema),
       response: jsonResponse<ThreadResponse>({ status: 201 }),
     }),
     get: defineRoute({
@@ -1393,17 +1417,21 @@ export const publicApiRoutes = {
     send: defineRoute({
       path: "/threads/:id/send",
       method: "post",
-      request: jsonRequest<PathId, SendMessageRequest>(
-        sendMessageRequestSchema,
-      ),
+      request: jsonRequest<
+        PathId,
+        SendMessageRequest,
+        typeof sendMessageRequestSchema
+      >(sendMessageRequestSchema),
       response: jsonResponse<SendMessageResponse>(),
     }),
     editMessage: defineRoute({
       path: "/threads/:id/edit-message",
       method: "post",
-      request: jsonRequest<PathId, EditMessageRequest>(
-        editMessageRequestSchema,
-      ),
+      request: jsonRequest<
+        PathId,
+        EditMessageRequest,
+        typeof editMessageRequestSchema
+      >(editMessageRequestSchema),
       response: jsonResponse<EditMessageResponse>(),
     }),
     /**
@@ -1430,9 +1458,11 @@ export const publicApiRoutes = {
     createQueuedMessage: defineRoute({
       path: "/threads/:id/queued-messages",
       method: "post",
-      request: jsonRequest<PathId, CreateQueuedMessageRequest>(
-        createQueuedMessageRequestSchema,
-      ),
+      request: jsonRequest<
+        PathId,
+        CreateQueuedMessageRequest,
+        typeof createQueuedMessageRequestSchema
+      >(createQueuedMessageRequestSchema),
       response: jsonResponse<ThreadQueuedMessage>({ status: 201 }),
     }),
     updateQueuedMessage: defineRoute({
@@ -1440,7 +1470,8 @@ export const publicApiRoutes = {
       method: "patch",
       request: jsonRequest<
         PathThreadAndQueuedMessage,
-        UpdateQueuedMessageRequest
+        UpdateQueuedMessageRequest,
+        typeof updateQueuedMessageRequestSchema
       >(updateQueuedMessageRequestSchema),
       response: jsonResponse<ThreadQueuedMessage>(),
     }),

@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import type { PromptInput } from "@get-bb/plugin-sdk/provider-bridge";
+import type { RuntimePromptInput } from "@get-bb/plugin-sdk/provider-bridge";
 import {
   experimental_assembleCapturedThreadEvents as assembleCapturedThreadEvents,
   experimental_createBridgeJsonRpcTestHarness as createBridgeJsonRpcTestHarness,
@@ -23,7 +23,7 @@ const THREAD_ID = "thr_zero_work_1";
 let harness: BridgeJsonRpcTestHarness;
 let workspaceDir: string;
 
-function compactCommandInput(): PromptInput[] {
+function compactCommandInput(): RuntimePromptInput[] {
   return [
     {
       type: "text",

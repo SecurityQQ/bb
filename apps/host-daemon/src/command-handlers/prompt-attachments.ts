@@ -3,7 +3,7 @@ import path from "node:path";
 import {
   PROMPT_ATTACHMENT_MAX_BYTES,
   type ClientTurnRequestId,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { resolveContainedPath } from "@bb/process-utils";
 import {
@@ -12,7 +12,7 @@ import {
 } from "../command-dispatch-support.js";
 
 type AttachmentPromptInput = Extract<
-  PromptInput,
+  RuntimePromptInput,
   { type: "localFile" | "localImage" }
 >;
 
@@ -20,7 +20,7 @@ const STAGED_ATTACHMENT_MODE = 0o600;
 
 interface StagePromptAttachmentsArgs {
   fetchProjectAttachment: CommandDispatchOptions["fetchProjectAttachment"];
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   projectId: string;
   requestId: ClientTurnRequestId;
   threadStorageRootPath: string;
@@ -31,7 +31,7 @@ interface StagePromptAttachmentGroupsArgs extends Omit<
   StagePromptAttachmentsArgs,
   "input"
 > {
-  inputGroups: PromptInput[][];
+  inputGroups: RuntimePromptInput[][];
 }
 
 interface StageAttachmentArgs extends StagePromptAttachmentsArgs {
@@ -41,12 +41,12 @@ interface StageAttachmentArgs extends StagePromptAttachmentsArgs {
 
 interface StagedPromptAttachments {
   cleanup: () => Promise<void>;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
 }
 
 interface StagedPromptAttachmentGroups {
   cleanup: () => Promise<void>;
-  inputGroups: PromptInput[][];
+  inputGroups: RuntimePromptInput[][];
 }
 
 interface StagePromptInputListArgs extends StagePromptAttachmentsArgs {
@@ -63,7 +63,7 @@ function pathLooksRuntimeReadable(rawPath: string): boolean {
 }
 
 function shouldStageAttachment(
-  input: PromptInput,
+  input: RuntimePromptInput,
 ): input is AttachmentPromptInput {
   if (input.type !== "localFile" && input.type !== "localImage") {
     return false;
@@ -220,8 +220,8 @@ async function stageAttachment(args: StageAttachmentArgs): Promise<string> {
 
 async function stagePromptInputList(
   args: StagePromptInputListArgs,
-): Promise<PromptInput[]> {
-  const stagedInput: PromptInput[] = [];
+): Promise<RuntimePromptInput[]> {
+  const stagedInput: RuntimePromptInput[] = [];
   for (const input of args.input) {
     if (!shouldStageAttachment(input)) {
       stagedInput.push(input);
@@ -277,7 +277,7 @@ export async function stagePromptAttachmentGroups(
 
   const stagedPaths: string[] = [];
   try {
-    const inputGroups: PromptInput[][] = [];
+    const inputGroups: RuntimePromptInput[][] = [];
     for (const input of args.inputGroups) {
       inputGroups.push(
         await stagePromptInputList({

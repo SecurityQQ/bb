@@ -5,7 +5,7 @@ import {
   encodeClientTurnRequestIdNumber,
   threadScope,
   turnScope,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { createConnection } from "../../src/connection.js";
 import { noopNotifier } from "../../src/notifier.js";
@@ -77,7 +77,7 @@ function dropThreadSearchSchema(db: ReturnType<typeof createConnection>): void {
   `);
 }
 
-function textInput(text: string, visibility?: "agent-only"): PromptInput {
+function textInput(text: string, visibility?: "agent-only"): RuntimePromptInput {
   return {
     type: "text",
     text,
@@ -86,7 +86,7 @@ function textInput(text: string, visibility?: "agent-only"): PromptInput {
   };
 }
 
-function turnRequestData(input: PromptInput[]) {
+function turnRequestData(input: RuntimePromptInput[]) {
   return {
     direction: "outbound" as const,
     requestId: encodeClientTurnRequestIdNumber({ value: 1 }),

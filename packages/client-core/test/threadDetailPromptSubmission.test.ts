@@ -1,4 +1,7 @@
-import type { PromptInput, ThreadRuntimeDisplayStatus } from "@bb/domain";
+import type {
+  RuntimePromptInput,
+  ThreadRuntimeDisplayStatus,
+} from "@bb/domain";
 import { describe, expect, it } from "vitest";
 import {
   buildAutoFollowUpRequest,
@@ -11,7 +14,7 @@ import {
   shouldQueueFollowUpMessage,
 } from "../src/prompt/threadDetailPromptSubmission.js";
 
-const textInput: PromptInput[] = [
+const textInput: RuntimePromptInput[] = [
   { type: "text", text: "Follow up", mentions: [] },
 ];
 

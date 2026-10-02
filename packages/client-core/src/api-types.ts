@@ -1,11 +1,17 @@
-import type { ThreadOriginKind } from "@bb/domain";
-import type { CreateThreadRequest } from "@bb/server-contract";
+import type {
+  ThreadOriginKind,
+  PromptInput,
+  RuntimePromptInput,
+} from "@bb/domain";
+import type { RuntimeCreateThreadRequest } from "@bb/server-contract";
 
 export type AppCreateThreadRequest = Omit<
-  CreateThreadRequest,
-  "origin" | "startedOnBehalfOf" | "originKind"
+  RuntimeCreateThreadRequest,
+  "origin" | "startedOnBehalfOf" | "originKind" | "input"
 > &
-  Partial<Pick<CreateThreadRequest, "startedOnBehalfOf" | "originKind">>;
+  Partial<
+    Pick<RuntimeCreateThreadRequest, "startedOnBehalfOf" | "originKind">
+  > & { input: (PromptInput | RuntimePromptInput)[] };
 
 export interface ThreadListFilters {
   projectId?: string;

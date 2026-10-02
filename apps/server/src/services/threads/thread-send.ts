@@ -6,7 +6,7 @@ import {
 import type { DbConnection, DbTransaction, EnvironmentRow } from "@bb/db";
 import type {
   ClientTurnRequestId,
-  PromptInput,
+  RuntimePromptInput,
   ResolvedThreadExecutionOptions,
   Thread,
   ThreadTurnInitiator,
@@ -16,7 +16,7 @@ import {
   flattenPromptInputGroups,
   isStandaloneBuiltinClearCommand,
 } from "@bb/domain";
-import type { SendMessageRequest } from "@bb/server-contract";
+import type { RuntimeSendMessageRequest } from "@bb/server-contract";
 import { renderTemplate } from "@bb/templates";
 import type {
   AppDeps,
@@ -65,7 +65,10 @@ import {
   throwSenderThreadInvalid,
   throwThreadNotWritable,
 } from "../lib/lifecycle-api-errors.js";
-import { resolvePromptAttachmentReferences } from "../projects/attachments.js";
+import {
+  resolvePromptHost,
+  resolvePromptAttachmentReferences,
+} from "../projects/attachments.js";
 import { resolvePluginMentionContextInputs } from "../plugins/plugin-mentions.js";
 import { clearThreadContext } from "./thread-context-clear.js";
 import { withThreadSendGuard } from "./thread-context-mutation-guard.js";
@@ -79,12 +82,12 @@ import {
 import type { TelemetryEvent } from "../system/telemetry.js";
 import { assertThreadHostAcceptsWork } from "./thread-host-admission.js";
 
-type SendThreadMessageMode = SendMessageRequest["mode"];
-type TextPromptInput = Extract<PromptInput, { type: "text" }>;
+type SendThreadMessageMode = RuntimeSendMessageRequest["mode"];
+type TextPromptInput = Extract<RuntimePromptInput, { type: "text" }>;
 type SendThreadMessageTrigger = "auto-dispatch" | "user";
 
-type SendThreadMessagePayload = SendMessageRequest & {
-  inputGroups?: PromptInput[][];
+type SendThreadMessagePayload = RuntimeSendMessageRequest & {
+  inputGroups?: RuntimePromptInput[][];
 };
 
 interface SendThreadMessageArgs {
@@ -111,7 +114,7 @@ interface ResolveMessageSenderArgs {
 }
 
 interface FormatAgentThreadInputArgs {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   senderThreadId: string;
 }
 
@@ -151,8 +154,8 @@ interface AppendAndQueueSendThreadMessageArgs {
   environmentId: string | null;
   execution: ResolvedThreadExecutionOptions;
   initiator: ThreadTurnInitiator;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   queueInTransaction: SendThreadMessageQueueRequest;
   requestId: ClientTurnRequestId;
   senderThreadId: string | null;
@@ -310,7 +313,7 @@ function buildAgentThreadMessageText(
 
 export function formatAgentThreadInput(
   args: FormatAgentThreadInputArgs,
-): PromptInput[] {
+): RuntimePromptInput[] {
   const firstTextIndex = args.input.findIndex((item) => item.type === "text");
   if (firstTextIndex === -1) {
     const textItem: TextPromptInput = {
@@ -539,7 +542,7 @@ async function sendThreadMessageWithoutContextClear(
   const resolvedInput = await resolvePromptAttachmentReferences({
     db: deps.db,
     dataDir: deps.config.dataDir,
-    input,
+    input: resolvePromptHost(input, environment.hostId),
     projectId: thread.projectId,
   });
   const resolvedByInput = new Map(

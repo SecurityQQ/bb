@@ -9,7 +9,7 @@ import {
   encodeClientTurnRequestIdNumber,
   PROMPT_ATTACHMENT_MAX_BYTES,
   type ClientTurnRequestId,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { dispatchCommand } from "../../src/command-dispatch.js";
@@ -30,7 +30,7 @@ afterEach(cleanupTempDirs);
 
 let nextClientRequestIdValue = 1;
 
-type TextPromptInput = Extract<PromptInput, { type: "text" }>;
+type TextPromptInput = Extract<RuntimePromptInput, { type: "text" }>;
 
 function textPromptInput(text: string): TextPromptInput {
   return { type: "text", text, mentions: [] };

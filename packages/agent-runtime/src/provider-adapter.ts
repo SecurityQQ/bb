@@ -3,7 +3,7 @@ import type {
   DynamicTool,
   InstructionMode,
   JsonObject,
-  PromptInput,
+  RuntimePromptInput,
   PromptMode,
   ReasoningLevel,
   RuntimePermissionPolicy,
@@ -82,7 +82,7 @@ export type AdapterCommand =
       type: "turn/start";
       threadId: string;
       providerThreadId: string;
-      input: PromptInput[];
+      input: RuntimePromptInput[];
       clientRequestId: ClientTurnRequestId;
       options: ProviderExecutionContext;
     }
@@ -91,7 +91,7 @@ export type AdapterCommand =
       threadId: string;
       providerThreadId: string;
       expectedTurnId: string;
-      input: PromptInput[];
+      input: RuntimePromptInput[];
       clientRequestId: ClientTurnRequestId;
       options: ProviderExecutionContext;
     }

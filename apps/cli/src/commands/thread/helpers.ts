@@ -5,6 +5,7 @@ import {
   createBuiltinPlanCommandTextInput,
   permissionModeInputSchema,
   type PermissionMode,
+  type RuntimePromptInput,
   type PromptInput,
   serviceTierSchema,
   type ServiceTier,
@@ -34,16 +35,16 @@ export function buildPromptInputs(args: {
   files?: readonly string[];
   images?: readonly string[];
   plan?: boolean;
-}): PromptInput[] {
+}): RuntimePromptInput[] {
   return [
     args.plan
       ? createBuiltinPlanCommandTextInput(args.message)
       : { type: "text", text: args.message, mentions: [] },
-    ...(args.files ?? []).map((path): PromptInput => ({
+    ...(args.files ?? []).map((path): RuntimePromptInput => ({
       type: "localFile",
       path,
     })),
-    ...(args.images ?? []).map((path): PromptInput => ({
+    ...(args.images ?? []).map((path): RuntimePromptInput => ({
       type: "localImage",
       path,
     })),
@@ -100,46 +101,50 @@ async function clientAttachmentMimeType(
 }
 
 export async function uploadClientAttachmentInputs(args: {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   resolveProjectId: () => Promise<string>;
   sdk: BbSdk;
 }): Promise<PromptInput[]> {
-  const clientPaths = args.input.map((item) =>
-    item.type === "localImage" || item.type === "localFile"
-      ? resolveClientAttachmentPath(item.path)
-      : null,
-  );
-  if (clientPaths.every((path) => path === null)) {
-    return args.input;
-  }
-
-  const projectId = await args.resolveProjectId();
-  const uploadedPathByClientPath = new Map<string, Promise<string>>();
-  const upload = (clientPath: string): Promise<string> => {
-    const existing = uploadedPathByClientPath.get(clientPath);
-    if (existing) return existing;
-    const pending = (async () => {
-      const bytes = await readFile(clientPath);
-      const filename = clientAttachmentFilename(clientPath);
-      const uploaded = await args.sdk.projects.attachments.upload({
-        clientFile: bytes,
-        filename,
-        mimeType: await clientAttachmentMimeType(clientPath, bytes),
-        projectId,
-      });
-      return uploaded.path;
-    })();
-    uploadedPathByClientPath.set(clientPath, pending);
-    return pending;
-  };
-
+  const uploaded = new Map<string, Promise<string>>();
+  let project: Promise<string> | undefined;
   return Promise.all(
-    args.input.map(async (item, index) => {
-      const clientPath = clientPaths[index];
-      return (item.type === "localImage" || item.type === "localFile") &&
-        clientPath
-        ? { ...item, path: await upload(clientPath) }
-        : item;
+    args.input.map(async (item): Promise<PromptInput> => {
+      if (item.type !== "localImage" && item.type !== "localFile") return item;
+      if (item.path.startsWith("attachment:")) {
+        const attachmentId = item.path.slice("attachment:".length);
+        if (!attachmentId) throw new Error("Attachment ID must not be empty");
+        return { type: "attachment", attachmentId };
+      }
+      if (item.attachmentId)
+        return { type: "attachment", attachmentId: item.attachmentId };
+      project ??= args.resolveProjectId();
+      const projectId = await project;
+      const clientPath = resolveClientAttachmentPath(item.path);
+      const key = clientPath ?? item.path;
+      let pending = uploaded.get(key);
+      if (!pending) {
+        pending = (async () => {
+          if (clientPath === null) {
+            return (
+              await args.sdk.projects.attachments.experimental_lookup({
+                projectId,
+                path: item.path,
+              })
+            ).id;
+          }
+          const bytes = await readFile(clientPath);
+          return (
+            await args.sdk.projects.attachments.upload({
+              clientFile: bytes,
+              filename: clientAttachmentFilename(clientPath),
+              mimeType: await clientAttachmentMimeType(clientPath, bytes),
+              projectId,
+            })
+          ).id;
+        })();
+        uploaded.set(key, pending);
+      }
+      return { type: "attachment", attachmentId: await pending };
     }),
   );
 }

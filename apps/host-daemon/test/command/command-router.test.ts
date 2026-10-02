@@ -7,7 +7,7 @@ import { WorkspaceError } from "@bb/host-workspace";
 import {
   encodeClientTurnRequestIdNumber,
   type ClientTurnRequestId,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import { createDeferredPromise } from "@bb/test-helpers";
 import { describe, expect, it, vi } from "vitest";
@@ -32,7 +32,7 @@ type EnvironmentProvisionCommand = Extract<
   { type: "environment.attach" }
 >;
 type RouterHarness = ReturnType<typeof createHarness>;
-type TextPromptInput = Extract<PromptInput, { type: "text" }>;
+type TextPromptInput = Extract<RuntimePromptInput, { type: "text" }>;
 type InteractiveResolveCommand = Extract<
   HostDaemonCommand,
   { type: "interactive.resolve" }

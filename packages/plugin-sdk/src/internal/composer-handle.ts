@@ -32,13 +32,20 @@ export interface ComposerEditorState {
   attachmentError: string | null;
 }
 
+export type RuntimeComposerDraftReplacement = Omit<
+  ComposerDraftReplacement,
+  "attachments"
+> & {
+  attachments?: ComposerDraftSnapshot["attachments"];
+};
+
 export interface ComposerHandleTarget {
   key: string;
   scope: PluginComposerScope;
   getDraft(): ComposerDraftSnapshot;
   getAttachmentCount(): number;
   getSelection(): ComposerSelection | null;
-  setDraft(next: ComposerDraftReplacement): void;
+  setDraft(next: RuntimeComposerDraftReplacement): void;
   addQuote(text: string): void;
   getEditorState(): ComposerEditorState;
   subscribeEditorState(listener: () => void): () => void;

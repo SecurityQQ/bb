@@ -7,6 +7,7 @@ import {
   pendingInteractionUserAnswerSchema,
   pendingInteractionUserQuestionQuestionSchema,
   promptTextMentionSchema,
+  runtimePromptInputSchema,
   systemMessageKindSchema,
   systemMessageSubjectSchema,
   threadEventItemPresentationSchema,
@@ -83,6 +84,7 @@ export const timelineConversationAttachmentsSchema = z.object({
   imageUrls: z.array(z.string()),
   localImagePaths: z.array(z.string()),
   localFilePaths: z.array(z.string()),
+  localReferences: z.array(runtimePromptInputSchema).optional(),
 });
 export type TimelineConversationAttachments = z.infer<
   typeof timelineConversationAttachmentsSchema

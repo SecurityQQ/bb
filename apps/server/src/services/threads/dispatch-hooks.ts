@@ -4,7 +4,7 @@ import {
   type Environment,
   type Host,
   type Project,
-  type PromptInput,
+  type RuntimePromptInput,
   type Thread,
   type StartedOnBehalfOf,
   type ThreadCreateOrigin,
@@ -92,7 +92,7 @@ export interface MessageDispatchHookPassRequest {
    */
   intendedHostId: string | null;
   environmentIntent: PluginDispatchEnvironmentIntent | null;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   requestedExecution: PluginDispatchExecution;
   executionSources: PluginDispatchExecutionSources;
   attempt: DispatchAttemptKind;
@@ -274,7 +274,9 @@ export function dispatchEnvironmentAndHost(
 }
 
 /** The concatenated text blocks, which is what a rules-based router matches on. */
-export function dispatchInputText(input: readonly PromptInput[]): string {
+export function dispatchInputText(
+  input: readonly RuntimePromptInput[],
+): string {
   return input
     .filter((block) => block.type === "text")
     .map((block) => block.text)

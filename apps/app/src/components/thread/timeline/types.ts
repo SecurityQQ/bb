@@ -1,5 +1,5 @@
 import type { ThreadChatMessageReference } from "@get-bb/plugin-sdk";
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 import type {
   MarkdownPreviewLocalFileLink,
   MarkdownPreviewLocalFileLinkHandler,
@@ -29,7 +29,7 @@ export type ThreadTimelineForkMessageHandler = (
 export interface ThreadTimelineEditMessageTarget {
   messageId: string;
   expectedRequestSequence: number;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
 }
 
 export type ThreadTimelineEditMessageHandler = (

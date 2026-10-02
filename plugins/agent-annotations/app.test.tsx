@@ -218,6 +218,7 @@ describe("AnnotateAction", () => {
             {
               type: "localFile",
               path: "attachments/spec.txt",
+              experimental_attachmentId: "attachment-spec",
               name: "spec.txt",
               sizeBytes: 12,
             },

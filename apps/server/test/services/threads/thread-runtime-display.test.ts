@@ -27,7 +27,7 @@ import {
 } from "@bb/domain";
 import type {
   ClientTurnRequestId,
-  PromptInput,
+  RuntimePromptInput,
   Thread,
   ThreadRuntimeState,
 } from "@bb/domain";
@@ -77,7 +77,7 @@ interface CreateThreadListEntryArgs {
   thread: ThreadWithPinSortKey;
 }
 
-const planPromptInput: PromptInput[] = [
+const planPromptInput: RuntimePromptInput[] = [
   {
     type: "text",
     text: "/plan inspect the failing command",
@@ -103,7 +103,7 @@ function turnRequestData({
   input,
   requestId,
 }: {
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   requestId: ClientTurnRequestId;
 }) {
   return {

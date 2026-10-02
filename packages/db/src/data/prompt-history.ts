@@ -4,7 +4,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import {
   PROMPT_HISTORY_ENTRY_LIMIT,
   type PromptHistoryScope,
-  type PromptInput,
+  type RuntimePromptInput,
 } from "@bb/domain";
 import type { DbQueryConnection } from "../connection.js";
 import { promptHistoryEntries, threads } from "../schema.js";
@@ -30,7 +30,7 @@ const storedPromptHistoryEntryColumns = {
 
 export interface CreatePromptHistoryEntryInput {
   createdAt?: number;
-  input: PromptInput[];
+  input: RuntimePromptInput[];
   projectId: string;
   requestSequence: number;
   scope: PromptHistoryScope;

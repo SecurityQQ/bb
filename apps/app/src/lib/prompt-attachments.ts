@@ -1,4 +1,4 @@
-import type { PromptInput } from "@bb/domain";
+import type { RuntimePromptInput } from "@bb/domain";
 
 interface PromptAttachmentCounts {
   webImages: number;
@@ -10,7 +10,7 @@ interface PromptAttachmentCounts {
 }
 
 export function collectPromptAttachments(
-  input: PromptInput[],
+  input: RuntimePromptInput[],
 ): PromptAttachmentCounts | undefined {
   let webImages = 0;
   let localImages = 0;

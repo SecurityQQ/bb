@@ -5,7 +5,7 @@ import { getPreparingEnvironment } from "@bb/db";
 import { getThread, type DbTransaction, type EnvironmentRow } from "@bb/db";
 import {
   type EnvironmentProviderSelection,
-  type PromptInput,
+  type RuntimePromptInput,
   type ResolvedThreadExecutionOptions,
   type SystemMessageKind,
   type SystemMessageSubject,
@@ -57,8 +57,8 @@ interface RequestThreadProvisionArgs {
   environmentIntent: ThreadProvisionEnvironmentIntent;
   execution: ResolvedThreadExecutionOptions;
   fork: ThreadForkDescriptor | null;
-  input: PromptInput[];
-  providerInput?: PromptInput[];
+  input: RuntimePromptInput[];
+  providerInput?: RuntimePromptInput[];
   startedOnBehalfOf: StartedOnBehalfOf | null;
   thread: Thread;
   titleProvided: boolean;
@@ -68,8 +68,8 @@ interface RequestThreadTargetReprovisionArgs {
   beforeRequestAppendInTransaction?: (args: { tx: DbTransaction }) => void;
   environment: EnvironmentRow;
   execution: ResolvedThreadExecutionOptions;
-  input: PromptInput[];
-  inputGroups?: PromptInput[][];
+  input: RuntimePromptInput[];
+  inputGroups?: RuntimePromptInput[][];
   initiator: ThreadTurnInitiator;
   senderThreadId: string | null;
   systemMessageKind?: SystemMessageKind;

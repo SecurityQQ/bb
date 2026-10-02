@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PromptHistoryScope, PromptInput } from "@bb/domain";
+import type { PromptHistoryScope, RuntimePromptInput } from "@bb/domain";
 import { createConnection } from "../../src/connection.js";
 import {
   createProject,
@@ -14,7 +14,7 @@ import { noopNotifier } from "../../src/notifier.js";
 
 type TestDb = ReturnType<typeof createConnection>;
 
-function text(text: string): PromptInput {
+function text(text: string): RuntimePromptInput {
   return { type: "text", text, mentions: [] };
 }
 
@@ -56,7 +56,7 @@ function insert(
   db: TestDb,
   args: {
     createdAt: number;
-    input: PromptInput[];
+    input: RuntimePromptInput[];
     projectId: string;
     requestSequence: number;
     scope: PromptHistoryScope;
