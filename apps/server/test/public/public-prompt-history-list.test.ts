@@ -51,7 +51,7 @@ describe("public prompt history list route", () => {
           source.id,
           new File(
             ["attachment bytes"],
-            type === "localImage" ? "attachment.png" : "attachment.txt",
+            type === "localImage" ? "attachment" : "attachment.txt",
             {
               type: type === "localImage" ? "image/png" : "text/plain",
             },
@@ -127,6 +127,17 @@ describe("public prompt history list route", () => {
           attachment.path,
         )!;
         expect(destinationAttachment.id).not.toBe(attachment.id);
+        const metadata = await readJson(
+          await harness.app.request(
+            `/api/v1/attachments/${destinationAttachment.id}`,
+          ),
+        );
+        expect(metadata).toMatchObject({
+          type,
+          name: attachment.name,
+          mimeType: attachment.mimeType,
+          sizeBytes: attachment.sizeBytes,
+        });
         expect(JSON.parse(queued.content)).toMatchObject([
           ...textInput("Review this attachment"),
           {
@@ -256,6 +267,50 @@ describe("public prompt history list route", () => {
       expect(legacy.entries[0]!.input).toEqual([
         { type: "localFile", path: "/tmp/report.txt" },
       ]);
+    });
+  });
+
+  it("keeps history readable when a legacy attachment uses a URI path", async () => {
+    await withTestHarness(async (harness) => {
+      const { host } = seedHostSession(harness.deps);
+      const { project } = seedProjectWithSource(harness.deps, {
+        hostId: host.id,
+      });
+      const thread = seedThread(harness.deps, { projectId: project.id });
+      const input = [
+        ...textInput("Review the report"),
+        {
+          type: "localFile" as const,
+          path: "file:///tmp/report.txt",
+          hostId: host.id,
+        },
+      ];
+      createPromptHistoryEntry(harness.deps.db, {
+        projectId: project.id,
+        threadId: thread.id,
+        scope: "thread",
+        requestSequence: 1,
+        input,
+      });
+      const response = await harness.app.request("/api/v1/prompt-history", {
+        headers: { "x-bb-prompt-references": "1" },
+      });
+      expect(response.status).toBe(200);
+      const history = referencePromptHistoryListResponseSchema.parse(
+        await readJson(response),
+      );
+      expect(history.entries[0]!.input).toEqual([
+        ...textInput("Review the report"),
+        {
+          type: "unavailableAttachment",
+          path: "file:///tmp/report.txt",
+          reason: expect.stringContaining("path"),
+        },
+      ]);
+      const legacy = promptHistoryListResponseSchema.parse(
+        await readJson(await harness.app.request("/api/v1/prompt-history")),
+      );
+      expect(legacy.entries[0]!.input).toEqual(input);
     });
   });
 

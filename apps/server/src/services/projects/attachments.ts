@@ -215,7 +215,7 @@ export async function referenceHistoryInput(
           ? { visibility: item.visibility }
           : {};
         if (pathLooksRuntimeReadable(item.path)) {
-          if (item.hostId)
+          if (item.hostId && promptInputSchema.safeParse(item).success)
             return {
               type: item.type,
               hostId: item.hostId,
@@ -225,8 +225,9 @@ export async function referenceHistoryInput(
           return {
             type: "unavailableAttachment",
             path: item.path,
-            reason:
-              "The original host was not recorded. Upload the file again.",
+            reason: item.hostId
+              ? "The original attachment path is unsupported. Upload the file again."
+              : "The original host was not recorded. Upload the file again.",
           };
         }
         try {
@@ -553,17 +554,23 @@ export async function copyProjectAttachments(
   const attachments = [];
   for (const path of uniquePaths) {
     const { content } = await readAttachment(dataDir, sourceProjectId, path);
-    attachments.push({ path, content });
+    const source = getProjectAttachment(db, sourceProjectId, path);
+    attachments.push({
+      path,
+      content,
+      originalName: source?.originalName ?? basename(path),
+      mimeType: source ? source.mimeType : mimeTypes.lookup(path) || null,
+    });
   }
-  for (const { path, content } of attachments) {
+  for (const { path, content, originalName, mimeType } of attachments) {
     await writeInventoriedAttachment(
       db,
       dataDir,
       targetProjectId,
       path,
       content,
-      basename(path),
-      mimeTypes.lookup(path) || null,
+      originalName,
+      mimeType,
     );
   }
 }
